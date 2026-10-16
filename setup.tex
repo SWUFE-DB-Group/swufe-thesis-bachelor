@@ -336,7 +336,14 @@
 % 10. 注释与脚注格式设置
 % 规范要求：采用脚注，每页独立从1开始编号，小五号宋体或 Times New Roman，正文编号上标
 % ---------------------------------------------------------
-\usepackage[perpage,bottom,hang]{footmisc}
+\usepackage[perpage,bottom]{footmisc}
+% 脚注左对齐，不使用首行或悬挂缩进；编号后仅留少量间距。
+\makeatletter
+\renewcommand{\@makefntext}[1]{%
+  \setlength{\parindent}{0pt}%
+  \noindent\@makefnmark\nobreak\hspace{0.25em}#1%
+}
+\makeatother
 % 覆盖 SJTUTeX 中文方案默认的圆圈数字，使用普通阿拉伯数字上标。
 \sjtusetup{style={fnmark-style=plain}}
 \renewcommand{\footnoterule}{\vspace*{-3pt}\hrule width 0.35\columnwidth height 0.4pt \vspace*{2.6pt}}
