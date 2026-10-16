@@ -76,7 +76,7 @@ p(\mathbf{x}; \boldsymbol{\mu}, \boldsymbol{\Sigma}) = \frac{1}{(2\pi)^{d/2}|\bo
 
 根据规范要求：“\textbf{毕业论文中有个别名词或情况需要解释时，可加注说明。注释采用脚注，每页独立编号，即每页都从 1 开始编码，编号用 1，2，3……，文中编号用上标}。注释、脚注内容采用小五号宋体或 Times New Roman”。
 
-例如，本文研究中使用了大语言模型\footnote{大语言模型（Large Language Model, LLM）指通常包含数百亿至数千亿参数量、基于大规模文本语料预训练的深度自回归神经网络模型。}，并结合了向量数据库\footnote{向量数据库（Vector Database）是一种专用于高维向量数据的索引检索与相似度计算的专用数据库系统。}进行知识增强。读者可以观察页面底部的脚注，每页从 1 开始重新独立编号，字号为小五号。
+例如，本文研究中使用了大语言模型\footnote{大语言模型（Large Language Model, LLM）指通常包含数百亿至数千亿参数量、基于大规模文本语料预训练的深度自回归神经网络模型。}，并结合了向量数据库\footnote{向量数据库（Vector Database）是一种专用于高维向量数据的索引检索与相似度计算的专用数据库系统。}进行知识增强。本页脚注依次编号为 1、2，后续页面的脚注重新从 1 开始。
 
 \section{算法与代码环境}
 
@@ -103,7 +103,7 @@ p(\mathbf{x}; \boldsymbol{\mu}, \boldsymbol{\Sigma}) = \frac{1}{(2\pi)^{d/2}|\bo
 \end{algorithm}
 
 \subsection{代码块排版}
-模板内置了 \texttt{codeblock} 环境，支持语法高亮与行号：
+模板内置了 \texttt{codeblock} 环境，支持语法高亮\footnote{语法高亮通过不同颜色或字形区分关键字、字符串和注释等代码元素，便于阅读。}与行号。此处脚注与前面的脚注示例位于同一章的不同页面，编号重新从 1 开始：
 
 \begin{codeblock}[language=Python]
 import torch

@@ -111,6 +111,8 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 参考文献在 `contents/参考文献.tex` 中使用 `thebibliography` 和 `\bibitem` 手工维护，通过 `\cite{文献键}` 引用。当前模板不使用 `.bib` 数据库，也不需要额外运行 BibTeX 或 Biber。
 
+脚注使用 `\footnote{说明文字}` 插入。`setup.tex` 中的 `fnmark-style=plain` 将正文标记设为普通阿拉伯数字上标，`footmisc` 的 `perpage` 选项使每页从 1 开始编号。同一章的不同页面及下一章均提供了脚注示例；使用 `latexmk` 编译可自动完成逐页编号所需的多遍处理。
+
 ## 项目结构
 
 ```text
