@@ -5,6 +5,13 @@
 % 依据：《西南财经大学本科生毕业论文（设计）撰写与印制规范》
 % =========================================================
 
+% 使用发行版提供的文档类，拒绝旧接口版本。
+\IfClassAtLeastTF{sjtuthesis}{2026/02/26}{}{%
+  \PackageError{swufe}{SJTUTeX 2.3.1 or newer is required}%
+    {Update the sjtutex package in your TeX distribution.\MessageBreak
+     On Overleaf, select TeX Live 2026 or newer.}%
+}
+
 \ExplSyntaxOn
 
 % ---------------------------------------------------------
@@ -42,6 +49,14 @@
         \tl_clear:N \l__swufe_info_display_title_tl
         \tl_clear:N \l__swufe_info_title_second_tl
       } ,
+    % 新版文档类要求显式语言；对外仍保留本科模板的单套字段。
+    subject    .meta:nn = { sjtu / info / zh } { subject = {#1} } ,
+    keywords   .meta:nn = { sjtu / info / zh } { keywords = {#1} } ,
+    author     .meta:nn = { sjtu / info / zh } { author = {#1} } ,
+    id         .meta:nn = { sjtu / info / zh } { id = {#1} } ,
+    department .meta:nn = { sjtu / info / zh } { department = {#1} } ,
+    major      .meta:nn = { sjtu / info / zh } { major = {#1} } ,
+    supervisor .meta:nn = { sjtu / info / zh } { supervisor = {#1} } ,
     grade         .tl_set:N = \l__swufe_info_grade_tl ,
     final-date    .tl_set:N = \l__swufe_info_final_date_tl ,
     display-title .tl_set:N = \l__swufe_info_display_title_tl ,
@@ -50,7 +65,7 @@
 
 \cs_set_eq:NN \swufesetup \sjtusetup
 
-% SJTUTeX 的单语言键映射到主语言信息；内部存储细节不暴露到配置中。
+% 本科模板的单套字段映射到中文主语言信息；内部存储细节不暴露到配置中。
 \newcommand{\swufetitle}{\tl_use:c { l__sjtu_info_title_zh_tl }}
 \newcommand{\swufeauthor}{\tl_use:c { l__sjtu_info_author_zh_tl }}
 \newcommand{\swufesupervisor}{\tl_use:c { l__sjtu_info_supervisor_zh_tl }}
@@ -77,7 +92,14 @@
       { \swufereviewtrue }
       { \swufereviewfalse }
   }
-\ctex_at_end_preamble:n { \__swufe_sync_review_status: }
+\ctex_at_end_preamble:n
+  {
+    \__swufe_sync_review_status:
+    % 盲审开关在 JSON 加载后才确定，同步 PDF 作者元数据。
+    \bool_if:NTF \g__sjtu_review_bool
+      { \cs_set:cpn { @author } { } }
+      { \cs_set:cpn { @author } { \swufeauthor } }
+  }
 \ExplSyntaxOff
 
 % ---------------------------------------------------------
@@ -122,7 +144,11 @@
       {
         \prop_if_in:NnT \swufeJsonData {#3}
           {
-            \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {#3}
+            % 重新分词 LaTeX 命令时保留标题、姓名中的普通空格。
+            \group_begin:
+              \char_set_catcode_space:n { 32 }
+              \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {#3}
+              \exp_args:NNNV \group_end: \tl_set:Nn \l_tmpa_tl \l_tmpa_tl
             \keys_set:nx {#1} { #2 = { \exp_not:V \l_tmpa_tl } }
           }
       }
@@ -666,14 +692,10 @@
     \normalfont\songti\zihao{-4}\bfseries #1
   }
 
-\cs_set:Npn \__sjtu_define_name_custom:
-  {
-    \tl_set:Nn \c__sjtu_name_item_sep_zh_tl { ； }
-    \tl_set:Nn \c__sjtu_name_item_sep_en_tl { ;~ }
-    \tl_set:Nn \c__sjtu_name_keywords_en_tl { Keywords }
-    \tl_set:Nn \c__sjtu_name_abstract_en_tl { ABSTRACT }
-  }
-\__sjtu_define_name_custom:
+\tl_set:Nn \c__sjtu_name_item_sep_zh_tl { ； }
+\tl_set:Nn \c__sjtu_name_item_sep_en_tl { ;~ }
+\tl_set:Nn \c__sjtu_name_keywords_en_tl { Keywords }
+\tl_set:Nn \c__sjtu_name_abstract_en_tl { ABSTRACT }
 \ExplSyntaxOff
 
 \makeatother

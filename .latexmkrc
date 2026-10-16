@@ -6,10 +6,8 @@
 # Set timezone.
 $ENV{'TZ'} = 'Asia/Shanghai';
 
-# Prepended local directories to the search paths.
-ensure_path( 'TEXINPUTS', './texmf//' );
-ensure_path( 'BSTINPUTS', './texmf/bibtex/bst/swufe' );
-# ensure_path( 'OSFONTDIR', './texmf/fonts//' );
+# SJTUTeX is provided by the TeX distribution (2.3.1 or newer).
+# The custom BibTeX style is in the project root.
 
 # PDF generate method:
 #   - 1 pdfLaTeX

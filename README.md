@@ -12,11 +12,29 @@
 
 提交论文时，请结合学院当年的具体要求检查最终稿。
 
+## 编译环境与版本要求
+
+本项目已适配 **SJTUTeX 2.3.1（2026-02-26）**，最低要求为该版本，使用 **XeLaTeX** 编译。推荐使用 **TeX Live 2026**；使用其他发行版时，请确认已安装 `sjtutex` 2.3.1 或更新版本，以及 `jsonparse` 等依赖宏包。当前验证环境为 TeX Live 2026 / SJTUTeX 2.3.1；更新版本仍需确认兼容性。
+
+[SJTUTeX 已被 CTAN 收录，并由 TeX Live、MiKTeX 分发](https://ctan.org/pkg/sjtutex)。本项目直接使用发行版中的文档类，不再附带旧版 `texmf/`，无需配置 `TEXINPUTS`。自定义的 `swufe-gbt7714-numerical.bst` 位于项目根目录，BibTeX 可直接查找，无需配置 `BSTINPUTS`。
+
+使用 TeX Live 官方安装器安装的环境，可运行：
+
+```bash
+tlmgr update --self
+tlmgr install sjtutex jsonparse
+tlmgr update sjtutex jsonparse
+```
+
+若 TeX Live 由操作系统包管理器安装，请通过对应包管理器更新；MiKTeX 用户可通过 MiKTeX Console 安装和更新宏包。
+
+编译日志开头应显示 `Document Class: sjtuthesis 2026/02/26 v2.3.1 ...` 或更新版本。从旧版项目迁移时，请删除旧的 `texmf/` 和依赖搜索路径设置，避免旧版文档类覆盖发行版版本。模板已迁移到新版的 `abstract` 环境（如 `[lang=zh,notintoc]`）与 `\tableofcontents[notintoc]` 接口；本科论文信息仍使用单套配置字段。
+
 ## 模板使用
 
-如果你不熟悉 LaTeX 的编译流程，建议使用下列编译脚本或编辑器配方。本地编译前，请安装最新的完整 TeX Live 发行版，包含 **XeLaTeX**、**BibTeX**、**latexmk** 及模板依赖的宏包。
+如果你不熟悉 LaTeX 的编译流程，建议使用下列编译脚本或编辑器配方。本地编译前，请满足上述版本要求，并安装 **BibTeX**、**latexmk** 及模板依赖的宏包。
 
-编译时，`latexmk` 会读取项目根目录的 `.latexmkrc`，自动设置本地文档类和参考文献样式的搜索路径，按需运行 BibTeX，并重复编译以更新目录、引用和页码。请在项目根目录运行命令。
+编译时，`latexmk` 会读取项目根目录的 `.latexmkrc`，使用发行版中的文档类，按需运行 BibTeX，并重复编译以更新目录、引用和页码。请在项目根目录运行命令。
 
 ### VS Code 用户
 
@@ -63,15 +81,14 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 在线编译无需在本机安装 TeX。以 Overleaf 为例：
 
-1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、`.latexmkrc`，以及完整的 `contents/`、`figures/`、`font/`、`texmf/` 目录。
+1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、`swufe-gbt7714-numerical.bst`，以及完整的 `contents/`、`figures/`、`font/` 目录。
 2. 在 Overleaf 中选择 **New Project → Upload Project**，上传 ZIP。确认 `main.tex` 位于项目根目录。
-3. 在在线项目根目录，将 `.latexmkrc` 重命名为 **`latexmkrc`**（去掉开头的点），保留其内容，使平台能够加载本地 `texmf/` 中的文档类、配置和 BibTeX 样式。
-4. 在项目设置中，将 **Main document** 设为 `main.tex`，**Compiler** 设为 **XeLaTeX**，并选择平台提供的较新 TeX Live 版本。
-5. 修改 `config.json` 和 `contents/` 中的论文内容，点击 **Recompile**，编译完成后下载 PDF。
+3. 在项目设置中，将 **Main document** 设为 `main.tex`，**Compiler** 设为 **XeLaTeX**，**TeX Live version** 设为 **2026**。该流程直接使用平台提供的 SJTUTeX，无需上传 `texmf/`，也无需创建或重命名 `latexmkrc`；仓库的 `.latexmkrc` 用于本地脚本编译。
+4. 修改 `config.json` 和 `contents/` 中的论文内容，点击 **Recompile**，编译完成后下载 PDF。若提示 `SJTUTeX 2.3.1 or newer is required`，请检查 TeX Live 版本，并清除项目中残留的旧文档类。
 
-其他支持 XeLaTeX 的在线 LaTeX 平台可采用相同流程：上传完整项目、指定 `main.tex` 为主文档、选择 XeLaTeX，并确保平台读取项目中的 latexmk 配置。字体文件通过相对路径加载，需一并上传并保留原文件名。
+其他在线平台同样需要满足 SJTUTeX 版本要求，上传完整项目并选择 XeLaTeX。字体文件通过相对路径加载，需保留原文件名。
 
-参考 Overleaf 官方文档：[上传项目](https://www.overleaf.com/learn/latex/Kb/Uploading_a_project)、[latexmkrc 配置](https://docs.overleaf.com/managing-projects-and-files/the-latexmkrc-file)、[编译器与 TeX Live 版本](https://docs.overleaf.com/getting-started/recompiling-your-project/selecting-a-tex-live-version-and-latex-compiler)。
+参考 Overleaf 官方文档：[上传项目](https://www.overleaf.com/learn/latex/Kb/Uploading_a_project)、[TeX Live 2026 公告](https://www.overleaf.com/blog/tex-live-2026-is-now-available)、[编译器与 TeX Live 版本](https://docs.overleaf.com/getting-started/recompiling-your-project/selecting-a-tex-live-version-and-latex-compiler)。
 
 ### 字体
 
@@ -85,7 +102,7 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 华文中宋标题和华文仿宋日期的粗体使用合成加粗。文件名须与配置一致，尤其注意 Linux 下的大小写。
 
-`texmf/` 内保留文档类按操作系统和字体选项加载的配置文件。
+正文宋体与标题黑体由发行版中的 SJTUTeX 字体方案提供：Windows 默认使用中易宋体、黑体，macOS 默认使用系统中文字体，其他系统默认使用 Fandol 宋体、黑体。
 
 ### 字号与间距
 
@@ -207,9 +224,10 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 ├── contents/                # 封面、摘要、正文及其他章节
 ├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
 ├── font/                    # 华文中宋、华文仿宋与 Times New Roman 字体文件
-├── texmf/                   # 本地论文文档类、配置与 GB/T 7714 BibTeX 样式
-├── .latexmkrc               # 编译引擎与本地依赖搜索路径
+├── swufe-gbt7714-numerical.bst # 中文优先的 GB/T 7714 BibTeX 样式
+├── .latexmkrc               # 本地 XeLaTeX / BibTeX 编译配置
 ├── .gitignore               # 编译产物与编辑器临时文件忽略规则
+├── tests/                   # 版本迁移与编译检查
 ├── Makefile                 # make 编译入口
 ├── Compile.bat              # Windows 编译入口
 └── LICENSE
@@ -217,6 +235,16 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 学术声明与封底分别通过 `contents/学术声明.tex`、`contents/封底.tex` 嵌入 `figures/copyright.pdf` 和 `figures/last.pdf`。这些 PDF 是编译输入，应与源代码一起保留。生成的 `main.pdf` 和编译中间文件由 `.gitignore` 忽略。
 
+## 开发检查
+
+修改模板后可运行：
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+检查需要 Python 3、XeLaTeX、BibTeX、latexmk 和 Poppler（`pdfinfo`、`pdftotext`、`pdftohtml`）。脚本在临时目录中编译，不读取项目的 `.latexmkrc`，验证发行版文档类、JSON 与默认配置、盲审元数据、两种文献来源、字体字号、页边距及脚注间距。
+
 ## 许可与致谢
 
-项目许可证见 [LICENSE](LICENSE)。感谢 [SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 及其所基于的[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 的作者，以及 [gbt7714-bibtex-style](https://github.com/zepinglee/gbt7714-bibtex-style) 的维护者。本地 SJTUTeX 文件和修改后的 BibTeX 样式保留其原有的 LaTeX Project Public License 声明。
+项目许可证见 [LICENSE](LICENSE)。感谢 [SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 及其所基于的[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 的作者，以及 [gbt7714-bibtex-style](https://github.com/zepinglee/gbt7714-bibtex-style) 的维护者。SJTUTeX 由 TeX 发行版提供；本项目修改后的 BibTeX 样式保留其原有的 LaTeX Project Public License 声明。
