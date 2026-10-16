@@ -65,36 +65,41 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 ## 填写论文信息
 
-优先修改根目录的 `config.json`。其中的非空字段会覆盖 `setup.tex` 的默认值；JSON 字符串中的 LaTeX 反斜杠需要写成 `\\`。
+优先修改根目录的 `config.json`。论文信息统一放在 `info` 中，标题、姓名、学院、专业、导师和关键词均直接填写字符串，无需区分中英文。配置中已提供的字段会覆盖 `setup.tex` 的默认值；空字符串可用于清空可选字段。JSON 字符串中的 LaTeX 反斜杠需要写成 `\\`。
 
 | 字段 | 用途 |
 | --- | --- |
 | `review` | 是否启用盲审模式，取 `true` 或 `false` |
 | `citation_superscript` | 文献引用是否使用上标；默认 `false`（非上标），设为 `true` 启用上标 |
-| `info.title.zh` / `info.title.en` | 中英文完整论文标题 |
-| `info.title.display_zh` | 封面题目的第一行；留空则使用完整中文标题 |
-| `info.title.display_zh_line2` | 封面题目的第二行；留空则只显示一行 |
-| `info.author.zh` / `info.author.en` | 中英文作者姓名 |
+| `info.title` | 完整论文标题，用于页眉和 PDF 元数据 |
+| `info.display_title` | 封面题目的第一行；省略或留空则使用完整标题 |
+| `info.title_second` | 封面题目的第二行；省略或留空则只显示一行 |
+| `info.author` | 作者姓名 |
 | `info.student_id` | 学号，建议保留为字符串 |
-| `info.department.zh` / `info.department.en` | 学院名称 |
-| `info.major.zh` / `info.major.en` | 专业名称 |
+| `info.department` | 学院名称 |
+| `info.major` | 专业名称 |
 | `info.grade` | 年级，如 `2022级` |
-| `info.supervisor.zh` / `info.supervisor.en` | 导师姓名及职称 |
+| `info.supervisor` | 导师姓名及职称 |
 | `info.final_date` | 封面日期，如 `2026年5月` |
-| `info.keywords.zh` / `info.keywords.en` | 中英文关键词 |
+| `info.keywords` | 关键词，用英文逗号分隔 |
 
 例如，封面题目需要分成两行时，可设置：
 
 ```json
-"title": {
-  "zh": "面向金融数据的风险识别方法研究",
-  "en": "Risk Identification Methods for Financial Data",
-  "display_zh": "面向金融数据的",
-  "display_zh_line2": "风险识别方法研究"
+{
+  "info": {
+    "title": "面向金融数据的风险识别方法研究",
+    "display_title": "面向金融数据的",
+    "title_second": "风险识别方法研究"
+  }
 }
 ```
 
-这是 `info.title` 对象的示例，替换 `config.json` 中对应的对象即可。封面每行的下划线宽度为 9cm，长标题应通过这两个字段合理拆分。
+将上述三个字段填写到 `config.json` 的 `info` 中，其他字段按需保留。封面每行的下划线宽度为 9cm，长标题可通过 `display_title` 和 `title_second` 合理拆分。只填写 `title` 时，封面使用完整标题，不保留示例标题的分行。
+
+不使用 JSON 时，可直接修改 `setup.tex` 第 2 节的 `\swufesetup` 默认设置。该设置同样只有一套 `title`、`author`、`department`、`major`、`supervisor`、`keywords` 等字段；学号使用 `id`，封面分行与日期使用 `display-title`、`title-second` 和 `final-date`。
+
+中文摘要的关键词由 `info.keywords` 自动生成；英文摘要的正文及英文关键词直接在 `contents/abstract.tex` 中维护。
 
 将 `review` 设为 `true` 时，封面隐藏姓名、学号和导师信息，并跳过致谢页。正文、插图等自行填写的个人信息仍需检查。
 

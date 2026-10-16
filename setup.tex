@@ -8,190 +8,129 @@
 \ExplSyntaxOn
 
 % ---------------------------------------------------------
-% 1. 论文元数据键值扩展（本科生专属字段）
+% 1. 本科论文信息与开关（单套字段，不区分语言）
 % ---------------------------------------------------------
-\tl_new:N   \l__swufe_info_grade_tl
-\tl_new:N   \l__swufe_info_final_date_tl
-\tl_new:N   \l__swufe_info_display_title_zh_tl
-\tl_new:N   \l__swufe_info_display_title_en_tl
-\tl_new:N   \l__swufe_info_title_second_zh_tl
+\tl_new:N \l__swufe_info_grade_tl
+\tl_new:N \l__swufe_info_final_date_tl
+\tl_new:N \l__swufe_info_display_title_tl
+\tl_new:N \l__swufe_info_title_second_tl
 \bool_new:N \g__swufe_citation_superscript_bool
 
 \keys_define:nn { sjtu }
   {
-    review                  .bool_gset:N = \g__sjtu_review_bool ,
-    citation-superscript     .bool_gset:N = \g__swufe_citation_superscript_bool ,
+    review              .bool_gset:N = \g__sjtu_review_bool ,
+    citation-superscript .bool_gset:N = \g__swufe_citation_superscript_bool ,
   }
-
-\keys_define:nn { sjtu / style }
-  {
-    review                  .bool_gset:N = \g__sjtu_review_bool ,
-  }
-
 \keys_define:nn { sjtu / info }
   {
-    grade                   .tl_set:N = \l__swufe_info_grade_tl ,
-    zh / grade              .tl_set:N = \l__swufe_info_grade_tl ,
-    final-date              .tl_set:N = \l__swufe_info_final_date_tl ,
-    zh / final-date         .tl_set:N = \l__swufe_info_final_date_tl ,
-    zh / display-title      .tl_set:N = \l__swufe_info_display_title_zh_tl ,
-    en / display-title      .tl_set:N = \l__swufe_info_display_title_en_tl ,
-    zh / title-second       .tl_set:N = \l__swufe_info_title_second_zh_tl ,
+    % 修改完整标题时清空封面分行；后续可用两个可选字段重新指定。
+    title .code:n =
+      {
+        \tl_set:cn { l__sjtu_info_title_zh_tl } {#1}
+        \tl_clear:N \l__swufe_info_display_title_tl
+        \tl_clear:N \l__swufe_info_title_second_tl
+      } ,
+    grade         .tl_set:N = \l__swufe_info_grade_tl ,
+    final-date    .tl_set:N = \l__swufe_info_final_date_tl ,
+    display-title .tl_set:N = \l__swufe_info_display_title_tl ,
+    title-second  .tl_set:N = \l__swufe_info_title_second_tl ,
   }
 
-% 别名 \swufesetup
 \cs_set_eq:NN \swufesetup \sjtusetup
 
-% 获取论文基本信息的宏接口
-\cs_new:Npn \swufe_get_display_title_zh:
-  {
-    \tl_if_empty:NTF \l__swufe_info_display_title_zh_tl
-      { \tl_use:c { l__sjtu_info_title_zh_tl } }
-      { \tl_use:N \l__swufe_info_display_title_zh_tl }
-  }
-\cs_new:Npn \swufe_get_display_title_en:
-  {
-    \tl_if_empty:NTF \l__swufe_info_display_title_en_tl
-      { \tl_use:c { l__sjtu_info_title_en_tl } }
-      { \tl_use:N \l__swufe_info_display_title_en_tl }
-  }
-
-\newcommand{\swufezhdisplaytitle}{\swufe_get_display_title_zh:}
-\newcommand{\swufezhtitlesecond}{\tl_use:N \l__swufe_info_title_second_zh_tl}
-\newcommand{\swufeendisplaytitle}{\swufe_get_display_title_en:}
-\newcommand{\swufezhtitle}{\tl_use:c { l__sjtu_info_title_zh_tl }}
-\newcommand{\swufeentitle}{\tl_use:c { l__sjtu_info_title_en_tl }}
+% SJTUTeX 的单语言键映射到主语言信息；内部存储细节不暴露到配置中。
+\newcommand{\swufetitle}{\tl_use:c { l__sjtu_info_title_zh_tl }}
 \newcommand{\swufeauthor}{\tl_use:c { l__sjtu_info_author_zh_tl }}
 \newcommand{\swufesupervisor}{\tl_use:c { l__sjtu_info_supervisor_zh_tl }}
 \newcommand{\swufedepartment}{\tl_use:c { l__sjtu_info_department_zh_tl }}
 \newcommand{\swufemajor}{\tl_use:c { l__sjtu_info_major_zh_tl }}
-\newcommand{\swufegrade}{\tl_use:N \l__swufe_info_grade_tl}
 \newcommand{\swufeid}{\tl_use:c { l__sjtu_info_id_zh_tl }}
+\newcommand{\swufegrade}{\tl_use:N \l__swufe_info_grade_tl}
+\newcommand{\swufetitlesecond}{\tl_use:N \l__swufe_info_title_second_tl}
+\newcommand{\swufedisplaytitle}{%
+  \tl_if_empty:NTF \l__swufe_info_display_title_tl
+    { \swufetitle }
+    { \tl_use:N \l__swufe_info_display_title_tl }%
+}
 \newcommand{\swufefinaldate}{%
   \tl_if_empty:NTF \l__swufe_info_final_date_tl
     { \tl_use:c { l__sjtu_info_date_zh_tl } }
     { \tl_use:N \l__swufe_info_final_date_tl }%
 }
 
-% 盲审控制布尔开关
 \newif\ifswufereview
-\cs_if_exist:NF \ifreview { \newif\ifreview }
-
 \cs_new_protected:Npn \__swufe_sync_review_status:
   {
     \bool_if:NTF \g__sjtu_review_bool
-      {
-        \swufereviewtrue
-        \cs_if_exist:NT \reviewtrue { \reviewtrue }
-      }
-      {
-        \swufereviewfalse
-        \cs_if_exist:NT \reviewfalse { \reviewfalse }
-      }
+      { \swufereviewtrue }
+      { \swufereviewfalse }
   }
-
-\ctex_at_end_preamble:n
-  {
-    \__swufe_sync_review_status:
-  }
+\ctex_at_end_preamble:n { \__swufe_sync_review_status: }
 \ExplSyntaxOff
 
 % ---------------------------------------------------------
-% 2. 默认元数据设置（可通过 config.json 覆盖）
+% 2. 默认设置（config.json 中已提供的字段覆盖对应默认值）
 % ---------------------------------------------------------
-\sjtusetup{
+\swufesetup{
   review = false,
   citation-superscript = false,
-  info = {%
-    zh / title          = {西南财经大学本科毕业论文（设计）\LaTeX{} 模板示例文档},
-    en / title          = {A Sample Document for SWUFE Undergraduate Thesis Template in LaTeX},
-    zh / keywords       = {西南财经大学；本科毕业论文；LaTeX 模板；排版规范},
-    en / keywords       = {SWUFE; Undergraduate Thesis; LaTeX Template; Typesetting Specification},
-    zh / author         = {张\quad{}三},
-    en / author         = {San Zhang},
-    id                  = {42100001},
-    zh / department     = {计算机与人工智能学院},
-    en / department     = {School of Computing and Artificial Intelligence},
-    zh / major          = {计算机科学与技术},
-    en / major          = {Computer Science and Technology},
-    zh / grade          = {2022级},
-    zh / supervisor     = {李四\quad{}教授},
-    en / supervisor     = {Prof.\ Si Li},
-    final-date          = {2026年5月},
+  info = {
+    title         = {西南财经大学本科毕业论文（设计）\LaTeX{} 模板示例文档},
+    display-title = {西南财经大学本科毕业论文（设计）},
+    title-second  = {\LaTeX{} 模板示例文档},
+    subject       = {西南财经大学本科毕业论文（设计）},
+    keywords      = {西南财经大学, 本科毕业论文, LaTeX 模板, 排版规范},
+    author        = {张\quad{}三},
+    id            = {42100001},
+    department    = {计算机与人工智能学院},
+    major         = {计算机科学与技术},
+    grade         = {2022级},
+    supervisor    = {李四\quad{}教授},
+    final-date    = {2026年5月},
   }
 }
 
 % ---------------------------------------------------------
-% 3. JSON 配置文件自动加载（零依赖原生解析）
+% 3. JSON 配置加载（仅接受 config.json 中的统一字段）
 % ---------------------------------------------------------
+\IfFileExists{config.json}{%
+  \RequirePackage{jsonparse}
+  \JSONParseFromFile{\swufeJsonData}{config.json}
+}{ }
 \ExplSyntaxOn
 \file_if_exist:nT { config.json }
   {
-    \cs_new_protected:Npn \__swufe_load_json_val:nn #1#2
+    % 同一入口读取字符串与布尔值；空字符串可用于清空可选字段。
+    \cs_new_protected:Npn \__swufe_load_json_field:nnn #1#2#3
       {
-        \clist_map_inline:nn {#2}
+        \prop_if_in:NnT \swufeJsonData {#3}
           {
-            \prop_if_in:NnT \swufeJsonData {##1}
-              {
-                \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {##1}
-                \tl_if_empty:NF \l_tmpa_tl
-                  {
-                    \keys_set:nx { sjtu / info } { #1 = { \exp_not:V \l_tmpa_tl } }
-                  }
-              }
+            \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {#3}
+            \keys_set:nx {#1} { #2 = { \exp_not:V \l_tmpa_tl } }
           }
       }
-    \cs_new_protected:Npn \__swufe_load_json_bool:nn #1#2
+    \clist_map_inline:nn
       {
-        \clist_map_inline:nn {#2}
-          {
-            \prop_if_in:NnT \swufeJsonData {##1}
-              {
-                \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {##1}
-                \tl_if_empty:NF \l_tmpa_tl
-                  {
-                    \keys_set:nx { sjtu } { #1 = \tl_use:N \l_tmpa_tl }
-                  }
-              }
-          }
+        { review }              { review } ,
+        { citation-superscript } { citation_superscript }
       }
-
-    \ExplSyntaxOff
-    \RequirePackage{jsonparse}
-    \JSONParseFromFile{\swufeJsonData}{config.json}
-    \ExplSyntaxOn
-
-    % 盲审模式
-    \__swufe_load_json_bool:nn { review } { {review} }
-    % 文献引用：默认非上标，可通过布尔值启用上标。
-    \__swufe_load_json_bool:nn { citation-superscript } { {citation_superscript} }
-
-    % 标题与关键词
-    \tl_clear:N \l__swufe_info_display_title_zh_tl
-    \tl_clear:N \l__swufe_info_display_title_en_tl
-    \tl_clear:N \l__swufe_info_title_second_zh_tl
-    \__swufe_load_json_val:nn { zh / title } { {info.title.zh}, {title.zh}, {title_zh} }
-    \__swufe_load_json_val:nn { en / title } { {info.title.en}, {title.en}, {title_en} }
-    \__swufe_load_json_val:nn { zh / display-title } { {info.title.display_zh}, {title.display_zh}, {display_title_zh} }
-    \__swufe_load_json_val:nn { zh / title-second } { {info.title.display_zh_line2}, {info.title.second_zh}, {info.title.zh_line2}, {title_second} }
-    \__swufe_load_json_val:nn { en / display-title } { {info.title.display_en}, {title.display_en}, {display_title_en} }
-    \__swufe_load_json_val:nn { zh / keywords } { {info.keywords.zh}, {keywords.zh}, {keywords_zh} }
-    \__swufe_load_json_val:nn { en / keywords } { {info.keywords.en}, {keywords.en}, {keywords_en} }
-
-    % 作者、学号、导师与学院专业
-    \__swufe_load_json_val:nn { zh / author } { {info.author.zh}, {author.zh}, {author_zh} }
-    \__swufe_load_json_val:nn { en / author } { {info.author.en}, {author.en}, {author_en} }
-    \__swufe_load_json_val:nn { id } { {info.student_id}, {student_id}, {id}, {info.id} }
-    \__swufe_load_json_val:nn { zh / department } { {info.department.zh}, {department.zh}, {department_zh} }
-    \__swufe_load_json_val:nn { en / department } { {info.department.en}, {department.en}, {department_en} }
-    \__swufe_load_json_val:nn { zh / major } { {info.major.zh}, {major.zh}, {major_zh} }
-    \__swufe_load_json_val:nn { en / major } { {info.major.en}, {major.en}, {major_en} }
-    \__swufe_load_json_val:nn { zh / grade } { {info.grade}, {grade} }
-    \__swufe_load_json_val:nn { zh / supervisor } { {info.supervisor.zh}, {supervisor.zh}, {supervisor_zh} }
-    \__swufe_load_json_val:nn { en / supervisor } { {info.supervisor.en}, {supervisor.en}, {supervisor_en} }
-    \__swufe_load_json_val:nn { final-date } { {info.final_date}, {final_date}, {final-date} }
+      { \__swufe_load_json_field:nnn { sjtu } #1 }
+    \clist_map_inline:nn
+      {
+        { title }         { info.title } ,
+        { display-title } { info.display_title } ,
+        { title-second }  { info.title_second } ,
+        { keywords }      { info.keywords } ,
+        { author }        { info.author } ,
+        { id }            { info.student_id } ,
+        { department }    { info.department } ,
+        { major }         { info.major } ,
+        { grade }         { info.grade } ,
+        { supervisor }    { info.supervisor } ,
+        { final-date }    { info.final_date }
+      }
+      { \__swufe_load_json_field:nnn { sjtu / info } #1 }
   }
-
 \__swufe_sync_review_status:
 \ExplSyntaxOff
 
@@ -381,7 +320,7 @@
 \fancyhf{}
 
 \if@twoside
-  \fancyhead[LE]{\zihao{-5}\songti \swufezhtitle}
+  \fancyhead[LE]{\zihao{-5}\songti \swufetitle}
   \fancyhead[RO]{\zihao{-5}\songti \leftmark}
 \else
   \fancyhead[C]{%
@@ -389,7 +328,7 @@
     \ifodd\value{page}
       \leftmark
     \else
-      \swufezhtitle
+      \swufetitle
     \fi
   }
 \fi
@@ -496,8 +435,8 @@
 % ---------------------------------------------------------
 \makeatletter
 \newcommand{\swufe@cover@defaults}{%
-  \let\swufe@bachelorcover@title\swufezhdisplaytitle
-  \let\swufe@bachelorcover@titlesecond\swufezhtitlesecond
+  \let\swufe@bachelorcover@title\swufedisplaytitle
+  \protected@edef\swufe@bachelorcover@titlesecond{\swufetitlesecond}
   \let\swufe@bachelorcover@department\swufedepartment
   \let\swufe@bachelorcover@major\swufemajor
   \let\swufe@bachelorcover@author\swufeauthor
