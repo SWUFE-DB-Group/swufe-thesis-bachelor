@@ -165,6 +165,7 @@
 \usepackage{geometry}
 \geometry{
   a4paper,
+  bindingoffset = 0pt, % 清除文档类默认的 0.5cm 装订偏移，保证左右均为 3cm
   top           = 3.0cm,
   bottom        = 3.0cm,
   left          = 3.0cm,
@@ -217,7 +218,15 @@
 % 规范要求：正文小四号宋体，行距1.5倍，段前0，段后0，首行缩进2字符，两端对齐
 % ---------------------------------------------------------
 \usepackage{setspace}
-\setstretch{1.38} % 对应 Word 1.5 倍行距
+% 使用 CTeX 的单倍基线（字号的 1.2 倍），再乘 1.5；
+% main.tex 禁用文档类默认的固定 20bp 基线，避免重复放大。
+\setstretch{1.5}
+% 标题段前、段后“行”统一以小四号正文的实际基线间距计量。
+\newlength{\swufebodyline}
+\begingroup
+  \normalsize
+  \global\swufebodyline=\baselineskip
+\endgroup
 \setlength{\parindent}{2\ccwd}
 \setlength{\parskip}{0pt}
 
@@ -233,21 +242,23 @@
     name        = {},
     number      = \arabic{chapter},
     aftername   = {\ },
-    format      = \centering\zhongsong\bfseries\zihao{2},
-    beforeskip  = 26pt,
-    afterskip   = 18pt,
+    format      = \normalfont\centering\zhongsong\bfseries\setstretch{1.5}\zihao{2},
+    beforeskip  = 3\swufebodyline,
+    afterskip   = 2\swufebodyline,
     pagestyle   = fancy
   },
   section = {
-    format      = \heiti\zihao{-3},
-    beforeskip  = 14pt,
-    afterskip   = 12pt,
+    fixskip     = true,
+    format      = \normalfont\heiti\setstretch{1.5}\zihao{-3},
+    beforeskip  = \swufebodyline,
+    afterskip   = \swufebodyline,
     indent      = 0pt
   },
   subsection = {
-    format      = \heiti\zihao{4},
-    beforeskip  = 12pt,
-    afterskip   = 10pt,
+    fixskip     = true,
+    format      = \normalfont\heiti\setstretch{1.5}\zihao{-4},
+    beforeskip  = \swufebodyline,
+    afterskip   = \swufebodyline,
     indent      = 0pt
   }
 }
@@ -341,6 +352,7 @@
 \renewcommand{\chaptermark}[1]{%
   \markboth{\if@mainmatter\arabic{chapter}\ \fi#1}{}}
 
+\setlength{\headwidth}{\textwidth}
 \fancyhf{}
 
 \if@twoside
@@ -438,7 +450,9 @@
       { \setcitestyle{numbers,square,comma} }
   }
 \ExplSyntaxOff
-\AtBeginEnvironment{thebibliography}{\singlespacing}
+% 参考文献内容与正文一致；两种文献来源共用此设置。
+\renewcommand{\bibfont}{\normalfont\songti\setstretch{1.5}\zihao{-4}}
+\setlength{\bibsep}{0pt}
 
 % 两种来源共用 natbib 和正文引用设置；BibTeX 方式按中文优先排序。
 \ExplSyntaxOn
@@ -518,7 +532,7 @@
   \fi
   \thispagestyle{empty}%
   \begin{titlepage}
-    % 封面使用独立行距，避免正文的 1.38 倍行距再次放大表格行高。
+    % 封面使用独立行距，避免正文的 1.5 倍行距再次放大表格行高。
     \setstretch{1}
     \begin{center}
       \vspace*{0.2cm}
@@ -642,7 +656,7 @@
 \cs_set_protected:Npn \__sjtu_keywords_format:n #1
   {
     \par\noindent
-    \textbf{#1}
+    \normalfont\songti\zihao{-4}\bfseries #1
   }
 
 \cs_set:Npn \__sjtu_define_name_custom:

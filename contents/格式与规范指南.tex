@@ -7,7 +7,9 @@
 \subsection{正文格式要求}
 根据规范要求，正文采用\textbf{小四号宋体}，西文与数字采用 \textbf{Times New Roman}，行距为 1.5 倍行距，段前 0、段后 0，首行缩进 2 字符。
 
-在 \LaTeX{} 中，本模板已通过 \texttt{setup.tex} 自动化配置了相应的行距（\texttt{\textbackslash setstretch\{1.38\}}）与缩进（\texttt{\textbackslash setlength\{\textbackslash parindent\}\{2\textbackslash ccwd\}}）。用户撰写段落时只需正常敲击两次回车分段即可，严禁使用多个全角空格进行手动空格缩进。
+模板已在 \texttt{setup.tex} 中统一设置行距与首行缩进。
+行距为 1.5 倍，首行缩进为两个汉字宽度。
+用户撰写段落时只需正常敲击两次回车分段即可，不要使用多个全角空格手动缩进。
 
 \subsection{三级标题示例}
 这是一个三级标题示范。根据规范，三级标题采用小四号黑体，首行无缩进，段前 1 行、段后 1 行，1.5 倍行距。其编号格式为“2.1.1 ……”。
@@ -52,7 +54,8 @@ Deep Neural Network & \textbf{96.8\%} & \textbf{96.2\%} & \textbf{96.5\%} & \tex
 \label{fig:swufe-tree-demo}
 \end{figure}
 
-通过 \texttt{\textbackslash ref\{fig:swufe-logo-demo\}} 与 \texttt{\textbackslash ref\{tab:model-performance\}} 可以自动交叉引用，生成的编号分别为图~\ref{fig:swufe-logo-demo} 与表~\ref{tab:model-performance}。
+使用 \texttt{\textbackslash ref} 命令和图表的标签可自动交叉引用。
+例如，本章的校名图和性能表分别为图~\ref{fig:swufe-logo-demo} 与表~\ref{tab:model-performance}。
 
 \section{数学公式编写}
 

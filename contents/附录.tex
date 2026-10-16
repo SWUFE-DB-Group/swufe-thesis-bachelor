@@ -60,4 +60,8 @@ class GraphAttentionLayer(nn.Module):
 \section*{附录 B\quad 数学定理补充推导}
 
 针对第二章中高维协方差估计量的一致性收敛阶，在此给出渐近正态性的详细数学证明：
-设 $X_1, X_2, \ldots, X_n \overset{i.i.d.}{\sim} \mathcal{N}_p(\boldsymbol{0}, \boldsymbol{\Sigma})$，样本协方差矩阵定义为 $\mathbf{S}_n = \frac{1}{n}\sum_{i=1}^n X_i X_i^T$。在维数与样本量之比满足 $p/n \to c \in (0, 1)$ 的高维渐近机制下，经由 Marchenko-Pastur 定律展开可得其特征值谱分布满足收敛性结论。
+设 $X_1, X_2, \ldots, X_n \overset{i.i.d.}{\sim} \mathcal{N}_p(\boldsymbol{0}, \boldsymbol{\Sigma})$，样本协方差矩阵定义为
+\[
+\mathbf{S}_n = \frac{1}{n}\sum_{i=1}^n X_i X_i^T.
+\]
+在维数与样本量之比满足 $p/n \to c \in (0, 1)$ 的高维渐近机制下，经由 Marchenko-Pastur 定律展开可得其特征值谱分布满足收敛性结论。
