@@ -12,28 +12,52 @@
 
 提交论文时，请结合学院当年的具体要求检查最终稿。
 
-## 编译
+## 模板使用
 
-需要安装包含 **XeLaTeX**、**BibTeX** 和 **latexmk** 的 TeX 发行版，以及 `ctex`、`fontspec`、`xeCJK`、`jsonparse`、`newtx`、`tikz`、`pgfplots` 等依赖。使用较新的完整 TeX Live 可减少缺少宏包的问题。
+如果你不熟悉 LaTeX 的编译流程，建议使用下列编译脚本或编辑器配方。本地编译前，请安装最新的完整 TeX Live 发行版，包含 **XeLaTeX**、**BibTeX**、**latexmk** 及模板依赖的宏包。
 
-在项目根目录执行：
+编译时，`latexmk` 会读取项目根目录的 `.latexmkrc`，自动设置本地文档类和参考文献样式的搜索路径，按需运行 BibTeX，并重复编译以更新目录、引用和页码。请在项目根目录运行命令。
+
+### VS Code 用户
+
+安装 **LaTeX Workshop** 扩展，选择 **Recipe: latexmk (xelatex)** 进行编译，并在 VS Code 设置中将 `latex-workshop.latex.recipe.default` 改为 `lastUsed`，以便后续继续使用该配方：
+
+```json
+{
+  "latex-workshop.latex.recipe.default": "lastUsed"
+}
+```
+
+### Linux 与 macOS 用户
+
+推荐使用模板提供的 `Makefile`：
+
+```bash
+make all          # 编译生成 main.pdf（也可直接运行 make）
+make clean        # 删除编译产生的中间文件，保留 main.pdf
+make cleanall     # 删除 main.pdf 和所有中间文件
+make wordcount    # 论文字数统计
+make pvc          # 监听文件变化并自动编译
+```
+
+### Windows 用户
+
+模板提供了 `Compile.bat`，可以双击直接编译，也可以在 PowerShell 或命令提示符中运行：
+
+```powershell
+.\Compile.bat thesis       # 编译生成 main.pdf
+.\Compile.bat clean        # 删除编译产生的中间文件，保留 main.pdf
+.\Compile.bat cleanall     # 删除 main.pdf 和所有中间文件
+.\Compile.bat wordcount    # 论文字数统计
+```
+
+### 直接使用 latexmk
+
+熟悉命令行的用户也可以执行：
 
 ```bash
 latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.tex
 ```
-
-生成文件为 `main.pdf`。`latexmk` 会读取 `.latexmkrc`，自动设置本地文档类和参考文献样式的搜索路径，按需运行 BibTeX，并重复编译以更新目录、引用和页码；无需使用 Biber。
-
-Linux / macOS 也可以使用：
-
-```bash
-make             # 编译
-make pvc         # 监听文件变化并自动编译
-make clean       # 清理中间文件，保留 main.pdf
-make cleanall    # 同时删除 main.pdf
-```
-
-Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 `latexmk` 命令。批处理脚本也支持 `Compile.bat clean` 和 `Compile.bat cleanall`。
 
 ### Overleaf 等在线平台
 
