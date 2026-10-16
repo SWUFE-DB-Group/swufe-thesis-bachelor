@@ -1,0 +1,35 @@
+{
+  "review": false,
+  "info": {
+    "title": {
+      "zh": "西南财经大学本科毕业论文（设计）\\LaTeX{} 模板示例文档",
+      "en": "A Sample Document for SWUFE Undergraduate Thesis Template in LaTeX",
+      "display_zh": "西南财经大学本科毕业论文（设计）",
+      "display_zh_line2": "\\LaTeX{} 模板示例文档",
+      "display_en": ""
+    },
+    "keywords": {
+      "zh": "西南财经大学, 本科毕业论文, LaTeX 模板, 排版规范",
+      "en": "SWUFE, Undergraduate Thesis, LaTeX Template, Typesetting Specification"
+    },
+    "author": {
+      "zh": "张\\quad{}三",
+      "en": "San Zhang"
+    },
+    "student_id": "42100001",
+    "department": {
+      "zh": "计算机与人工智能学院",
+      "en": "School of Computing and Artificial Intelligence"
+    },
+    "major": {
+      "zh": "计算机科学与技术",
+      "en": "Computer Science and Technology"
+    },
+    "grade": "2022级",
+    "supervisor": {
+      "zh": "李四\\quad{}教授",
+      "en": "Prof.\\ Si Li"
+    },
+    "final_date": "2026年5月"
+  }
+}

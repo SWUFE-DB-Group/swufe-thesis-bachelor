@@ -1,0 +1,63 @@
+% !TEX root = ../main.tex
+
+% =========================================================
+% 附录
+% 规范要求：
+% 1. 装订顺序：置于参考文献之后、致谢之前
+% 2. 附录标题：同一级标题格式（二号华文中宋加粗，居中，段前3行，段后2行）
+% 3. 附录内容：同正文格式（小四号宋体，1.5倍行距）
+% 4. 收录范围：不宜放在正文中的重要支撑材料（原始数据、详细数学推导、核心程序源码等）
+% =========================================================
+
+\phantomsection
+\addcontentsline{toc}{chapter}{附录}
+\chapter*{附\quad 录}
+\markboth{附录}{附录}
+
+\section*{附录 A\quad 核心算法源代码清单}
+
+以下为本论文第三章核心模型的完整实现代码片段（PyTorch 2.0+ 实现）：
+
+\begin{codeblock}[language=Python]
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
+class GraphAttentionLayer(nn.Module):
+    """图注意力网络层（GAT）核心算子实现"""
+    def __init__(self, in_features: int, out_features: int, dropout: float = 0.2, alpha: float = 0.2):
+        super(GraphAttentionLayer, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.dropout = dropout
+        self.alpha = alpha
+
+        self.W = nn.Parameter(torch.empty(size=(in_features, out_features)))
+        nn.init.xavier_uniform_(self.W.data, gain=1.414)
+        self.a = nn.Parameter(torch.empty(size=(2 * out_features, 1)))
+        nn.init.xavier_uniform_(self.a.data, gain=1.414)
+
+        self.leakyrelu = nn.LeakyReLU(self.alpha)
+
+    def forward(self, h: torch.Tensor, adj: torch.Tensor) -> torch.Tensor:
+        Wh = torch.mm(h, self.W)
+        e = self._prepare_attentional_mechanism_input(Wh)
+
+        zero_vec = -9e15 * torch.ones_like(e)
+        attention = torch.where(adj > 0, e, zero_vec)
+        attention = F.softmax(attention, dim=1)
+        attention = F.dropout(attention, self.dropout, training=self.training)
+        h_prime = torch.matmul(attention, Wh)
+        return F.elu(h_prime)
+
+    def _prepare_attentional_mechanism_input(self, Wh: torch.Tensor) -> torch.Tensor:
+        Wh1 = torch.matmul(Wh, self.a[:self.out_features, :])
+        Wh2 = torch.matmul(Wh, self.a[self.out_features:, :])
+        e = Wh1 + Wh2.T
+        return self.leakyrelu(e)
+\end{codeblock}
+
+\section*{附录 B\quad 数学定理补充推导}
+
+针对第二章中高维协方差估计量的一致性收敛阶，在此给出渐近正态性的详细数学证明：
+设 $X_1, X_2, \ldots, X_n \overset{i.i.d.}{\sim} \mathcal{N}_p(\boldsymbol{0}, \boldsymbol{\Sigma})$，样本协方差矩阵定义为 $\mathbf{S}_n = \frac{1}{n}\sum_{i=1}^n X_i X_i^T$。在维数与样本量之比满足 $p/n \to c \in (0, 1)$ 的高维渐近机制下，经由 Marchenko-Pastur 定律展开可得其特征值谱分布满足收敛性结论。

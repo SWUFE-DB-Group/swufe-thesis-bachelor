@@ -1,0 +1,112 @@
+# 西南财经大学本科毕业论文 LaTeX 模板
+
+用于撰写西南财经大学本科生毕业论文（设计），包含封面、学术声明、中英文摘要、目录、正文、参考文献、附录、致谢和封底。模板基于 SJTUTeX 的 `sjtuthesis` 文档类，在 `setup.tex` 中配置西南财经大学的版式与论文信息。
+
+## 规范来源
+
+排版依据为《西南财经大学本科生毕业论文（设计）撰写与印制规范》。
+
+- [规范来源：西南财经大学计算机与人工智能学院](https://it.swufe.edu.cn/info/1166/22938.htm)
+
+提交论文时，请结合学院当年的具体要求检查最终稿。
+
+## 编译
+
+需要安装包含 **XeLaTeX** 和 **latexmk** 的 TeX 发行版，以及 `ctex`、`fontspec`、`xeCJK`、`jsonparse`、`newtx`、`tikz`、`pgfplots` 等依赖。使用较新的完整 TeX Live 可减少缺少宏包的问题。
+
+在项目根目录执行：
+
+```bash
+latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.tex
+```
+
+生成文件为 `main.pdf`。`latexmk` 会读取 `.latexmkrc`，自动设置本地 `texmf/` 的搜索路径，并按需重复编译以更新目录、引用和页码。
+
+Linux / macOS 也可以使用：
+
+```bash
+make             # 编译
+make pvc         # 监听文件变化并自动编译
+make clean       # 清理中间文件，保留 main.pdf
+make cleanall    # 同时删除 main.pdf
+```
+
+Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 `latexmk` 命令。批处理脚本也支持 `Compile.bat clean` 和 `Compile.bat cleanall`。
+
+### 字体
+
+`font/` 中的华文中宋和 Times New Roman 字体由模板直接通过文件路径加载，无需另行安装。华文中宋的粗体使用合成加粗。
+
+封面字段优先使用 `font/STFANGSO.TTF`（华文仿宋）；未提供该文件时，使用 TeX 发行版中的 Fandol 仿宋。`texmf/` 内保留文档类按操作系统和字体选项加载的配置文件。
+
+## 填写论文信息
+
+优先修改根目录的 `config.json`。其中的非空字段会覆盖 `setup.tex` 的默认值；JSON 字符串中的 LaTeX 反斜杠需要写成 `\\`。
+
+| 字段 | 用途 |
+| --- | --- |
+| `review` | 是否启用盲审模式，取 `true` 或 `false` |
+| `info.title.zh` / `info.title.en` | 中英文完整论文标题 |
+| `info.title.display_zh` | 封面题目的第一行；留空则使用完整中文标题 |
+| `info.title.display_zh_line2` | 封面题目的第二行；留空则只显示一行 |
+| `info.author.zh` / `info.author.en` | 中英文作者姓名 |
+| `info.student_id` | 学号，建议保留为字符串 |
+| `info.department.zh` / `info.department.en` | 学院名称 |
+| `info.major.zh` / `info.major.en` | 专业名称 |
+| `info.grade` | 年级，如 `2022级` |
+| `info.supervisor.zh` / `info.supervisor.en` | 导师姓名及职称 |
+| `info.final_date` | 封面日期，如 `2026年5月` |
+| `info.keywords.zh` / `info.keywords.en` | 中英文关键词 |
+
+例如，封面题目需要分成两行时，可设置：
+
+```json
+"title": {
+  "zh": "面向金融数据的风险识别方法研究",
+  "en": "Risk Identification Methods for Financial Data",
+  "display_zh": "面向金融数据的",
+  "display_zh_line2": "风险识别方法研究"
+}
+```
+
+这是 `info.title` 对象的示例，替换 `config.json` 中对应的对象即可。封面每行的下划线宽度为 9cm，长标题应通过这两个字段合理拆分。
+
+将 `review` 设为 `true` 时，封面隐藏姓名、学号和导师信息，并跳过致谢页。正文、插图等自行填写的个人信息仍需检查。
+
+## 撰写正文与参考文献
+
+在 `contents/` 中修改各章内容；增加或删除章节时，同步调整 `main.tex` 中的 `\input{...}`。`contents/格式与规范指南.tex` 提供表格、插图、公式、脚注、算法和代码的示例。
+
+图表格式由 `setup.tex` 统一设置：
+
+- 图题、表题均为五号黑体加粗，居中，前后各空半行。
+- 表格的 `\caption` 写在表格内容之前，插图的 `\caption` 写在图片之后。
+- 图表内容为五号字体、单倍行距，无需在每个浮动体中重复设置。
+
+外部图片中已经绘制的文字需要在制图软件中设置字号；LaTeX 的字体设置只作用于其排版的文字。
+
+参考文献在 `contents/参考文献.tex` 中使用 `thebibliography` 和 `\bibitem` 手工维护，通过 `\cite{文献键}` 引用。当前模板不使用 `.bib` 数据库，也不需要额外运行 BibTeX 或 Biber。
+
+## 项目结构
+
+```text
+.
+├── main.tex                 # 主文档与章节顺序
+├── setup.tex                # 元数据读取、字体与版式配置
+├── config.json              # 论文信息与盲审开关
+├── contents/                # 封面、摘要、正文及其他章节
+├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
+├── font/                    # 华文中宋与 Times New Roman 字体文件
+├── texmf/                   # 本地 SJTUTeX 论文文档类及其配置
+├── .latexmkrc               # 编译引擎与本地依赖搜索路径
+├── .gitignore               # 编译产物与编辑器临时文件忽略规则
+├── Makefile                 # make 编译入口
+├── Compile.bat              # Windows 编译入口
+└── LICENSE
+```
+
+学术声明与封底分别通过 `contents/学术声明.tex`、`contents/封底.tex` 嵌入 `figures/copyright.pdf` 和 `figures/last.pdf`。这些 PDF 是编译输入，应与源代码一起保留。生成的 `main.pdf` 和编译中间文件由 `.gitignore` 忽略。
+
+## 许可与致谢
+
+项目许可证见 [LICENSE](LICENSE)。本地 SJTUTeX 文件保留其原有的 LaTeX Project Public License 声明，感谢原项目作者提供文档类基础。

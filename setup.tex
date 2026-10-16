@@ -1,0 +1,657 @@
+% !TEX root = ./main.tex
+
+% =========================================================
+% 西南财经大学本科生毕业论文（设计）宏包配置与全局格式
+% 依据：《西南财经大学本科生毕业论文（设计）撰写与印制规范》
+% =========================================================
+
+\ExplSyntaxOn
+
+% ---------------------------------------------------------
+% 1. 论文元数据键值扩展（本科生专属字段）
+% ---------------------------------------------------------
+\tl_new:N   \l__swufe_info_grade_tl
+\tl_new:N   \l__swufe_info_final_date_tl
+\tl_new:N   \l__swufe_info_display_title_zh_tl
+\tl_new:N   \l__swufe_info_display_title_en_tl
+\tl_new:N   \l__swufe_info_title_second_zh_tl
+
+\keys_define:nn { sjtu }
+  {
+    review                  .bool_gset:N = \g__sjtu_review_bool ,
+  }
+
+\keys_define:nn { sjtu / style }
+  {
+    review                  .bool_gset:N = \g__sjtu_review_bool ,
+  }
+
+\keys_define:nn { sjtu / info }
+  {
+    grade                   .tl_set:N = \l__swufe_info_grade_tl ,
+    zh / grade              .tl_set:N = \l__swufe_info_grade_tl ,
+    final-date              .tl_set:N = \l__swufe_info_final_date_tl ,
+    zh / final-date         .tl_set:N = \l__swufe_info_final_date_tl ,
+    zh / display-title      .tl_set:N = \l__swufe_info_display_title_zh_tl ,
+    en / display-title      .tl_set:N = \l__swufe_info_display_title_en_tl ,
+    zh / title-second       .tl_set:N = \l__swufe_info_title_second_zh_tl ,
+  }
+
+% 别名 \swufesetup
+\cs_set_eq:NN \swufesetup \sjtusetup
+
+% 获取论文基本信息的宏接口
+\cs_new:Npn \swufe_get_display_title_zh:
+  {
+    \tl_if_empty:NTF \l__swufe_info_display_title_zh_tl
+      { \tl_use:c { l__sjtu_info_title_zh_tl } }
+      { \tl_use:N \l__swufe_info_display_title_zh_tl }
+  }
+\cs_new:Npn \swufe_get_display_title_en:
+  {
+    \tl_if_empty:NTF \l__swufe_info_display_title_en_tl
+      { \tl_use:c { l__sjtu_info_title_en_tl } }
+      { \tl_use:N \l__swufe_info_display_title_en_tl }
+  }
+
+\newcommand{\swufezhdisplaytitle}{\swufe_get_display_title_zh:}
+\newcommand{\swufezhtitlesecond}{\tl_use:N \l__swufe_info_title_second_zh_tl}
+\newcommand{\swufeendisplaytitle}{\swufe_get_display_title_en:}
+\newcommand{\swufezhtitle}{\tl_use:c { l__sjtu_info_title_zh_tl }}
+\newcommand{\swufeentitle}{\tl_use:c { l__sjtu_info_title_en_tl }}
+\newcommand{\swufeauthor}{\tl_use:c { l__sjtu_info_author_zh_tl }}
+\newcommand{\swufesupervisor}{\tl_use:c { l__sjtu_info_supervisor_zh_tl }}
+\newcommand{\swufedepartment}{\tl_use:c { l__sjtu_info_department_zh_tl }}
+\newcommand{\swufemajor}{\tl_use:c { l__sjtu_info_major_zh_tl }}
+\newcommand{\swufegrade}{\tl_use:N \l__swufe_info_grade_tl}
+\newcommand{\swufeid}{\tl_use:c { l__sjtu_info_id_zh_tl }}
+\newcommand{\swufefinaldate}{%
+  \tl_if_empty:NTF \l__swufe_info_final_date_tl
+    { \tl_use:c { l__sjtu_info_date_zh_tl } }
+    { \tl_use:N \l__swufe_info_final_date_tl }%
+}
+
+% 盲审控制布尔开关
+\newif\ifswufereview
+\cs_if_exist:NF \ifreview { \newif\ifreview }
+
+\cs_new_protected:Npn \__swufe_sync_review_status:
+  {
+    \bool_if:NTF \g__sjtu_review_bool
+      {
+        \swufereviewtrue
+        \cs_if_exist:NT \reviewtrue { \reviewtrue }
+      }
+      {
+        \swufereviewfalse
+        \cs_if_exist:NT \reviewfalse { \reviewfalse }
+      }
+  }
+
+\ctex_at_end_preamble:n
+  {
+    \__swufe_sync_review_status:
+  }
+\ExplSyntaxOff
+
+% ---------------------------------------------------------
+% 2. 默认元数据设置（可通过 config.json 覆盖）
+% ---------------------------------------------------------
+\sjtusetup{
+  review = false,
+  info = {%
+    zh / title          = {西南财经大学本科毕业论文（设计）\LaTeX{} 模板示例文档},
+    en / title          = {A Sample Document for SWUFE Undergraduate Thesis Template in LaTeX},
+    zh / keywords       = {西南财经大学；本科毕业论文；LaTeX 模板；排版规范},
+    en / keywords       = {SWUFE; Undergraduate Thesis; LaTeX Template; Typesetting Specification},
+    zh / author         = {张\quad{}三},
+    en / author         = {San Zhang},
+    id                  = {42100001},
+    zh / department     = {计算机与人工智能学院},
+    en / department     = {School of Computing and Artificial Intelligence},
+    zh / major          = {计算机科学与技术},
+    en / major          = {Computer Science and Technology},
+    zh / grade          = {2022级},
+    zh / supervisor     = {李四\quad{}教授},
+    en / supervisor     = {Prof.\ Si Li},
+    final-date          = {2026年5月},
+  }
+}
+
+% ---------------------------------------------------------
+% 3. JSON 配置文件自动加载（零依赖原生解析）
+% ---------------------------------------------------------
+\ExplSyntaxOn
+\file_if_exist:nT { config.json }
+  {
+    \cs_new_protected:Npn \__swufe_load_json_val:nn #1#2
+      {
+        \clist_map_inline:nn {#2}
+          {
+            \prop_if_in:NnT \swufeJsonData {##1}
+              {
+                \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {##1}
+                \tl_if_empty:NF \l_tmpa_tl
+                  {
+                    \keys_set:nx { sjtu / info } { #1 = { \exp_not:V \l_tmpa_tl } }
+                  }
+              }
+          }
+      }
+    \cs_new_protected:Npn \__swufe_load_json_bool:nn #1#2
+      {
+        \clist_map_inline:nn {#2}
+          {
+            \prop_if_in:NnT \swufeJsonData {##1}
+              {
+                \JSONParseSetRescanValue \l_tmpa_tl \swufeJsonData {##1}
+                \tl_if_empty:NF \l_tmpa_tl
+                  {
+                    \keys_set:nx { sjtu } { #1 = \tl_use:N \l_tmpa_tl }
+                  }
+              }
+          }
+      }
+
+    \ExplSyntaxOff
+    \RequirePackage{jsonparse}
+    \JSONParseFromFile{\swufeJsonData}{config.json}
+    \ExplSyntaxOn
+
+    % 盲审模式
+    \__swufe_load_json_bool:nn { review } { {review} }
+
+    % 标题与关键词
+    \tl_clear:N \l__swufe_info_display_title_zh_tl
+    \tl_clear:N \l__swufe_info_display_title_en_tl
+    \tl_clear:N \l__swufe_info_title_second_zh_tl
+    \__swufe_load_json_val:nn { zh / title } { {info.title.zh}, {title.zh}, {title_zh} }
+    \__swufe_load_json_val:nn { en / title } { {info.title.en}, {title.en}, {title_en} }
+    \__swufe_load_json_val:nn { zh / display-title } { {info.title.display_zh}, {title.display_zh}, {display_title_zh} }
+    \__swufe_load_json_val:nn { zh / title-second } { {info.title.display_zh_line2}, {info.title.second_zh}, {info.title.zh_line2}, {title_second} }
+    \__swufe_load_json_val:nn { en / display-title } { {info.title.display_en}, {title.display_en}, {display_title_en} }
+    \__swufe_load_json_val:nn { zh / keywords } { {info.keywords.zh}, {keywords.zh}, {keywords_zh} }
+    \__swufe_load_json_val:nn { en / keywords } { {info.keywords.en}, {keywords.en}, {keywords_en} }
+
+    % 作者、学号、导师与学院专业
+    \__swufe_load_json_val:nn { zh / author } { {info.author.zh}, {author.zh}, {author_zh} }
+    \__swufe_load_json_val:nn { en / author } { {info.author.en}, {author.en}, {author_en} }
+    \__swufe_load_json_val:nn { id } { {info.student_id}, {student_id}, {id}, {info.id} }
+    \__swufe_load_json_val:nn { zh / department } { {info.department.zh}, {department.zh}, {department_zh} }
+    \__swufe_load_json_val:nn { en / department } { {info.department.en}, {department.en}, {department_en} }
+    \__swufe_load_json_val:nn { zh / major } { {info.major.zh}, {major.zh}, {major_zh} }
+    \__swufe_load_json_val:nn { en / major } { {info.major.en}, {major.en}, {major_en} }
+    \__swufe_load_json_val:nn { zh / grade } { {info.grade}, {grade} }
+    \__swufe_load_json_val:nn { zh / supervisor } { {info.supervisor.zh}, {supervisor.zh}, {supervisor_zh} }
+    \__swufe_load_json_val:nn { en / supervisor } { {info.supervisor.en}, {supervisor.en}, {supervisor_en} }
+    \__swufe_load_json_val:nn { final-date } { {info.final_date}, {final_date}, {final-date} }
+  }
+
+\__swufe_sync_review_status:
+\ExplSyntaxOff
+
+% ---------------------------------------------------------
+% 4. 页面尺寸与全文页边距
+% 规范要求：A4 纸，全文页边距：上3厘米，下3厘米，左3厘米，右3厘米。
+% ---------------------------------------------------------
+\usepackage{geometry}
+\geometry{
+  a4paper,
+  top           = 3.0cm,
+  bottom        = 3.0cm,
+  left          = 3.0cm,
+  right         = 3.0cm,
+  headheight    = 15pt,
+  headsep       = 18pt,
+  footskip      = 1.0cm
+}
+
+% ---------------------------------------------------------
+% 5. 字体配置
+% 规范要求：华文中宋（一级标题、中英文摘要标题、目录标题等）、宋体（正文）、黑体（二级、三级标题及图表题）
+% ---------------------------------------------------------
+\usepackage{fontspec}
+
+% 西文字体设为 Times New Roman
+\setmainfont[
+  Path = font/,
+  UprightFont    = {Times New Roman.ttf},
+  BoldFont       = {Times New Roman Bold.ttf},
+  ItalicFont     = {Times New Roman Italic.ttf},
+  BoldItalicFont = {Times New Roman Bold Italic.ttf}
+]{}
+
+% 华文中宋 (STZHONGS.TTF)
+% 华文中宋只有常规字重；显式提供合成粗体，避免 \bfseries 静默回退。
+\setCJKfamilyfont{zhongsong}[
+  Path=font/,
+  AutoFakeBold=2.5
+]{STZHONGS.TTF}
+\newcommand{\zhongsong}{\CJKfamily{zhongsong}}
+
+% 华文仿宋 / 仿宋回退定义（用于封面字段）
+% 仿宋通常也没有独立粗体字形，封面日期需要可用的粗体。
+\setCJKfamilyfont{hwfangsong}[AutoFakeBold=2]{FandolFang-Regular.otf}
+\newcommand{\hwfangsong}{\CJKfamily{hwfangsong}}
+\IfFileExists{font/STFANGSO.TTF}{
+  \setCJKfamilyfont{hwfangsong}[Path=font/,AutoFakeBold=2]{STFANGSO.TTF}
+}{}
+
+% 华文行楷 / 楷书回退定义（用于封底校训竖排）
+\providecommand{\hwxingkai}{\kaishu}
+\IfFileExists{font/STXINGKA.TTF}{
+  \setCJKfamilyfont{hwxingkai}[Path=font/]{STXINGKA.TTF}
+  \renewcommand{\hwxingkai}{\CJKfamily{hwxingkai}}
+}{}
+
+% ---------------------------------------------------------
+% 6. 行距与段落格式
+% 规范要求：正文小四号宋体，行距1.5倍，段前0，段后0，首行缩进2字符，两端对齐
+% ---------------------------------------------------------
+\usepackage{setspace}
+\setstretch{1.38} % 对应 Word 1.5 倍行距
+\setlength{\parindent}{2\ccwd}
+\setlength{\parskip}{0pt}
+
+% ---------------------------------------------------------
+% 7. 各级标题样式设置
+% 规范要求：
+% 一级标题：二号华文中宋加粗，居中，段前3行，段后2行，1.5倍行距，编号如“1. ……”或“1 ……”
+% 二级标题：小三号黑体，首行无缩进，段前1行，段后1行，1.5倍行距，编号如“1.1 ……”
+% 三级标题：小四号黑体，首行无缩进，段前1行，段后1行，1.5倍行距，编号如“1.1.1 ……”
+% ---------------------------------------------------------
+\ctexset{
+  chapter = {
+    name        = {},
+    number      = \arabic{chapter},
+    aftername   = {\ },
+    format      = \centering\zhongsong\bfseries\zihao{2},
+    beforeskip  = 26pt,
+    afterskip   = 18pt,
+    pagestyle   = fancy
+  },
+  section = {
+    format      = \heiti\zihao{-3},
+    beforeskip  = 14pt,
+    afterskip   = 12pt,
+    indent      = 0pt
+  },
+  subsection = {
+    format      = \heiti\zihao{4},
+    beforeskip  = 12pt,
+    afterskip   = 10pt,
+    indent      = 0pt
+  }
+}
+
+% ---------------------------------------------------------
+% 8. 目录格式设置
+% 规范要求：
+% 目录标题：二号华文中宋加粗，居中，段前3行，段后2行，1.5倍行距
+% 目录内容中章标题：小四号宋体加粗
+% 目录中其他内容：小四号宋体；不需出现图、表目录
+% ---------------------------------------------------------
+\usepackage{titletoc}
+
+\titlecontents{chapter}
+  [ 0 pt ] { \addvspace{6bp}\songti\bfseries\zihao{-4} }
+  { \contentspush{\thecontentslabel\quad} } { }
+  { \titlerule*[4bp]{.}\normalfont\zihao{-4}\thecontentspage }
+
+\titlecontents{section}
+  [ 1.5 em ] { \songti\zihao{-4} }
+  { \contentspush{\thecontentslabel\quad} } { }
+  { \titlerule*[4bp]{.}\zihao{-4}\thecontentspage }
+
+\titlecontents{subsection}
+  [ 3.0 em ] { \songti\zihao{-4} }
+  { \contentspush{\thecontentslabel\quad} } { }
+  { \titlerule*[4bp]{.}\zihao{-4}\thecontentspage }
+
+% ---------------------------------------------------------
+% 9. 图、表格式与编号设置
+% 规范要求：
+% 表的题目在表的上方（黑体加粗，居中，段前、段后各空0.5行）
+% 图的题目在图的下方（黑体加粗，居中，段前、段后各空0.5行）
+% 图、表的内容采用五号字体，单倍行距
+% 建议采用章节+次序编号：表1-1，图1-1，公式(1-1)
+% ---------------------------------------------------------
+\usepackage{caption}
+% 不使用 small（其字号取决于文档类），明确指定五号、单倍行距。
+\newcommand{\swufefloatfont}{\normalfont\songti\setstretch{1}\zihao{5}}
+\DeclareCaptionFont{swufecapfont}{\setstretch{1}\zihao{5}\heiti\bfseries}
+\newlength{\swufecaptionhalfline}
+\begingroup
+  \swufefloatfont
+  \global\swufecaptionhalfline=0.5\baselineskip
+\endgroup
+% 使用文档类提供的接口，同时覆盖普通浮动体、双栏浮动体和 longtable。
+\sjtusetup{style={float-font=\swufefloatfont}}
+% setspace 会在 \@floatboxreset 之后执行 \normalsize，覆盖文档类的设置。
+% 等所有宏包完成初始化后，在浮动体初始化末尾恢复五号与单倍行距。
+\makeatletter
+\AtBeginDocument{%
+  \apptocmd{\@xfloat}{\swufefloatfont}{}{%
+    \PackageError{swufe}{Cannot apply figure/table font settings}{}%
+  }%
+}
+\makeatother
+\captionsetup{
+  font          = swufecapfont,   % 五号（10.5bp）黑体加粗，含编号与题文
+  labelfont     = {},
+  textfont      = {},
+  labelsep      = quad,
+  justification = centering,
+  aboveskip     = \swufecaptionhalfline,
+  belowskip     = \swufecaptionhalfline
+}
+
+\captionsetup[table]{position=top}
+\captionsetup[figure]{position=bottom}
+
+\renewcommand{\thetable}{\arabic{chapter}-\arabic{table}}
+\renewcommand{\thefigure}{\arabic{chapter}-\arabic{figure}}
+\renewcommand{\theequation}{\arabic{chapter}-\arabic{equation}}
+
+% ---------------------------------------------------------
+% 10. 注释与脚注格式设置
+% 规范要求：采用脚注，每页独立从1开始编号，小五号宋体或 Times New Roman，正文编号上标
+% ---------------------------------------------------------
+\usepackage[perpage,bottom,hang]{footmisc}
+\renewcommand{\footnoterule}{\vspace*{-3pt}\hrule width 0.35\columnwidth height 0.4pt \vspace*{2.6pt}}
+
+% ---------------------------------------------------------
+% 11. 页眉页脚配置
+% 规范要求：单线页眉；页码居中、小五号阿拉伯数字
+% ---------------------------------------------------------
+\usepackage{fancyhdr}
+\setlength{\headheight}{15pt}
+
+\makeatletter
+\renewcommand{\chaptermark}[1]{%
+  \markboth{\if@mainmatter\arabic{chapter}\ \fi#1}{}}
+
+\fancyhf{}
+
+\if@twoside
+  \fancyhead[LE]{\zihao{-5}\songti \swufezhtitle}
+  \fancyhead[RO]{\zihao{-5}\songti \leftmark}
+\else
+  \fancyhead[C]{%
+    \zihao{-5}\songti
+    \ifodd\value{page}
+      \leftmark
+    \else
+      \swufezhtitle
+    \fi
+  }
+\fi
+
+\fancyfoot[C]{\zihao{-5}\thepage}
+
+% 单线页眉（0.4pt）
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\headrule}{\hrule height 0.4pt width\headwidth}
+
+% 章节首页也采用普通页眉
+\let\ps@plain\ps@fancy
+\makeatother
+
+% ---------------------------------------------------------
+% 12. 常用数学、代码、表格、插图宏包
+% ---------------------------------------------------------
+\let\Bbbk\relax
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{dcolumn}
+\usepackage{longtable}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage{pdfpages}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, shapes.geometric}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+
+% 算法环境
+\usepackage[ruled,vlined,linesnumbered]{algorithm2e}
+
+% 代码环境
+\usepackage{listings}
+\lstdefinestyle{swufeCodeStyle}{%
+  aboveskip         = \medskipamount,
+  belowskip         = \medskipamount,
+  basicstyle        = \ttfamily\zihao{-5}\setbaselineskip{12bp},
+  commentstyle      = \slshape\color{black!60},
+  stringstyle       = \color{green!40!black!100},
+  keywordstyle      = \bfseries\color{blue!50!black},
+  extendedchars     = false,
+  upquote           = true,
+  tabsize           = 2,
+  showstringspaces  = false,
+  xleftmargin       = 1em,
+  xrightmargin      = 1em,
+  breaklines        = true,
+  breakatwhitespace = false,
+  breakautoindent   = true,
+  breakindent       = 2em,
+  backgroundcolor   = \color{gray!10},
+  columns           = flexible,
+  keepspaces        = true,
+  mathescape        = false
+}
+\lstnewenvironment{codeblock}[1][]{%
+  \lstset{style=swufeCodeStyle,#1}}{}
+
+% 提示框
+\usepackage[most]{tcolorbox}
+\newtcolorbox{promptbox}{
+  colback   = green!10,
+  colframe  = green!50!black,
+  boxrule   = 0.8pt,
+  arc       = 2mm,
+  left      = 6pt,
+  right     = 6pt,
+  top       = 6pt,
+  bottom    = 6pt
+}
+
+% 参考文献引用宏包
+\usepackage[super,square]{natbib}
+\AtBeginEnvironment{thebibliography}{\singlespacing}
+
+% 图像路径
+\graphicspath{{figures/}}
+\DeclareGraphicsExtensions{.pdf,.eps,.png,.jpg,.jpeg}
+
+% 超链接设置
+\usepackage{hyperref}
+\hypersetup{
+  hidelinks,
+  colorlinks         = false,
+  pdfstartview       = FitH,
+  bookmarksnumbered  = true,
+  bookmarksopen      = true
+}
+
+% ---------------------------------------------------------
+% 13. 本科毕业论文封面环境（严格契合 docx 附件封面规范）
+% ---------------------------------------------------------
+\makeatletter
+\newcommand{\swufe@cover@defaults}{%
+  \let\swufe@bachelorcover@title\swufezhdisplaytitle
+  \let\swufe@bachelorcover@titlesecond\swufezhtitlesecond
+  \let\swufe@bachelorcover@department\swufedepartment
+  \let\swufe@bachelorcover@major\swufemajor
+  \let\swufe@bachelorcover@author\swufeauthor
+  \let\swufe@bachelorcover@studentid\swufeid
+  \let\swufe@bachelorcover@grade\swufegrade
+  \let\swufe@bachelorcover@supervisor\swufesupervisor
+  \let\swufe@bachelorcover@date\swufefinaldate
+}
+
+\pgfkeys{
+  /swufe/bachelorcover/.is family,
+  /swufe/bachelorcover,
+  title/.store in        = \swufe@bachelorcover@title,
+  title-second/.store in = \swufe@bachelorcover@titlesecond,
+  department/.store in   = \swufe@bachelorcover@department,
+  major/.store in        = \swufe@bachelorcover@major,
+  author/.store in       = \swufe@bachelorcover@author,
+  student-id/.store in   = \swufe@bachelorcover@studentid,
+  grade/.store in        = \swufe@bachelorcover@grade,
+  supervisor/.store in   = \swufe@bachelorcover@supervisor,
+  date/.store in         = \swufe@bachelorcover@date,
+}
+
+\newenvironment{swufebachelorcover}[1][]{%
+  \begingroup
+  \swufe@cover@defaults
+  \pgfkeys{/swufe/bachelorcover/.cd,#1}%
+  \ifswufereview
+    \def\swufe@bachelorcover@author{}%
+    \def\swufe@bachelorcover@studentid{}%
+    \def\swufe@bachelorcover@supervisor{}%
+  \fi
+  \thispagestyle{empty}%
+  \begin{titlepage}
+    % 封面使用独立行距，避免正文的 1.38 倍行距再次放大表格行高。
+    \setstretch{1}
+    \begin{center}
+      \vspace*{0.2cm}
+
+      % 1. 西南财经大学校名横幅（居中）
+      \includegraphics[width=7.2cm]{figures/swufebanner.pdf}
+
+      \vspace{0.9cm}
+
+      % 2. “本科毕业论文（设计）” 标题（华文中宋加粗，居中）
+      {\zhongsong\bfseries\fontsize{36bp}{44bp}\selectfont 本科毕业论文（设计）\par}
+
+      \vspace{0.9cm}
+
+      % 3. 西南财经大学圆形徽标（居中）
+      \includegraphics[width=3.6cm]{figures/swufelogo.pdf}
+
+      \vspace{1.6cm}
+
+      % 4. 封面元数据信息栏（三号 16pt，华文仿宋，下划线对齐）
+      {\hwfangsong\fontsize{16bp}{20bp}\selectfont
+      \renewcommand{\arraystretch}{1.5}
+      \begin{tabular}{r@{\ }l}
+        \ifx\swufe@bachelorcover@titlesecond\@empty
+          \makebox[4\ccwd][s]{论文题目}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@title}} \\
+        \else
+          \makebox[4\ccwd][s]{论文题目}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@title}} \\
+                                      & \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@titlesecond}} \\
+        \fi
+        \makebox[4\ccwd][s]{所在学院}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@department}} \\
+        \makebox[4\ccwd][s]{专\hfill 业}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@major}} \\
+        \makebox[4\ccwd][s]{学生姓名}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@author}} \\
+        \makebox[4\ccwd][s]{学\hfill 号}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@studentid}} \\
+        \makebox[4\ccwd][s]{年\hfill 级}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@grade}} \\
+        \makebox[4\ccwd][s]{指导教师}：& \underline{\makebox[9.0cm][c]{\swufe@bachelorcover@supervisor}} \\
+      \end{tabular}\par}
+
+      % 至少留出 1.8cm，将日期与信息栏明确分开；余量自动补齐。
+      \vspace{1.8cm plus 1fill}
+
+      % 5. 底部日期（三号，华文仿宋加粗居中）
+      {\hwfangsong\bfseries\zihao{3} \swufe@bachelorcover@date \par}
+      \vspace{1.2cm}
+    \end{center}
+  \end{titlepage}
+  \endgroup
+}{}
+
+\newcommand{\makeswufebachelorcover}[1][]{\begin{swufebachelorcover}[#1]\end{swufebachelorcover}}
+
+% ---------------------------------------------------------
+% 14. 原创性及知识产权声明原生排版环境
+% 依据：docx 附件《西南财经大学本科生毕业论文学术申明示例》
+% ---------------------------------------------------------
+\newcommand{\makeswufedeclaration}{%
+  \clearpage
+  \thispagestyle{empty}
+  \begin{center}
+    \vspace*{1.2cm}
+    {\zhongsong\bfseries\zihao{-2} 西南财经大学 \par}
+    \vspace{0.6cm}
+    {\zhongsong\bfseries\zihao{-2} 本科毕业论文原创性及知识产权声明 \par}
+  \end{center}
+
+  \vspace{1.8cm}
+
+  {\zihao{-4}\songti\setstretch{1.6}
+  本人郑重声明：所呈交的毕业论文是本人在导师的指导下取得的成果，论文写作严格遵循学术规范。对本论文的研究做出重要贡献的个人和集体，均已在文中以明确方式标明。因本毕业论文引起的法律结果完全由本人承担。\par
+
+  \vspace{1.2cm}
+  本毕业论文成果归西南财经大学所有。\par
+
+  \vspace{1.2cm}
+  特此声明\par}
+
+  \vfill
+
+  \begin{flushright}
+  {\zihao{-4}\songti\setstretch{1.8}
+  \begin{tabular}{l@{\ }l}
+    毕业论文作者签名：& \ifswufereview \underline{\makebox[5.0cm]{}} \else \underline{\makebox[5.0cm]{（必须手写）}} \fi \\
+    作者专业：& \ifswufereview \underline{\makebox[5.0cm]{}} \else \underline{\makebox[5.0cm]{\hwfangsong\swufemajor}} \fi \\
+    作者学号：& \ifswufereview \underline{\makebox[5.0cm]{}} \else \underline{\makebox[5.0cm]{\swufeid}} \fi \\
+    \multicolumn{2}{r}{\underline{\makebox[1.5cm]{}}\ 年\ \underline{\makebox[1.0cm]{}}\ 月\ \underline{\makebox[1.0cm]{}}\ 日}
+  \end{tabular}
+  \par}
+  \end{flushright}
+  \vspace{1.5cm}
+  \clearpage
+}
+
+% ---------------------------------------------------------
+% 15. 封底排版（光华铁树插图 + 竖排校训“经世济民 孜孜以求”）
+% 依据：docx 附件《西南财经大学本科生毕业论文封底示例》
+% ---------------------------------------------------------
+\newcommand{\makeswufebackcover}{%
+  \clearpage
+  \thispagestyle{empty}
+  \begin{tikzpicture}[remember picture, overlay]
+    % 铁树插图（居中略偏下，淡化作为背景图）
+    \node[anchor=center, yshift=-1.0cm] at (current page.center) {
+      \includegraphics[width=11.5cm]{figures/swufe_cycad.png}
+    };
+    % 竖排校训“经世济民 孜孜以求”
+    \node[anchor=center, xshift=1.0cm, yshift=1.8cm] at (current page.center) {
+      \hwxingkai\fontsize{48pt}{56pt}\selectfont
+      \begin{tabular}{c@{\hspace{1.8cm}}c}
+        \parbox[t]{2em}{\linespread{1.1}\selectfont 孜\\孜\\以\\求} &
+        \parbox[t]{2em}{\linespread{1.1}\selectfont 经\\世\\济\\民}
+      \end{tabular}
+    };
+  \end{tikzpicture}%
+  \null\clearpage
+}
+
+% ---------------------------------------------------------
+% 16. 中英文摘要专属宏定义与格式规范
+% ---------------------------------------------------------
+\ExplSyntaxOn
+% 覆盖 keywords 格式，中文以“；”分隔，末尾无标点
+\cs_set_protected:Npn \__sjtu_keywords_format:n #1
+  {
+    \par\noindent
+    \textbf{#1}
+  }
+
+\cs_set:Npn \__sjtu_define_name_custom:
+  {
+    \tl_set:Nn \c__sjtu_name_item_sep_zh_tl { ； }
+    \tl_set:Nn \c__sjtu_name_item_sep_en_tl { ;~ }
+    \tl_set:Nn \c__sjtu_name_keywords_en_tl { Keywords }
+    \tl_set:Nn \c__sjtu_name_abstract_en_tl { ABSTRACT }
+  }
+\__sjtu_define_name_custom:
+\ExplSyntaxOff
+
+\makeatother
