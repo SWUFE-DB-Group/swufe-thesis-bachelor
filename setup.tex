@@ -15,10 +15,12 @@
 \tl_new:N   \l__swufe_info_display_title_zh_tl
 \tl_new:N   \l__swufe_info_display_title_en_tl
 \tl_new:N   \l__swufe_info_title_second_zh_tl
+\bool_new:N \g__swufe_citation_superscript_bool
 
 \keys_define:nn { sjtu }
   {
     review                  .bool_gset:N = \g__sjtu_review_bool ,
+    citation-superscript     .bool_gset:N = \g__swufe_citation_superscript_bool ,
   }
 
 \keys_define:nn { sjtu / style }
@@ -99,6 +101,7 @@
 % ---------------------------------------------------------
 \sjtusetup{
   review = false,
+  citation-superscript = false,
   info = {%
     zh / title          = {西南财经大学本科毕业论文（设计）\LaTeX{} 模板示例文档},
     en / title          = {A Sample Document for SWUFE Undergraduate Thesis Template in LaTeX},
@@ -160,6 +163,8 @@
 
     % 盲审模式
     \__swufe_load_json_bool:nn { review } { {review} }
+    % 文献引用：默认非上标，可通过布尔值启用上标。
+    \__swufe_load_json_bool:nn { citation-superscript } { {citation_superscript} }
 
     % 标题与关键词
     \tl_clear:N \l__swufe_info_display_title_zh_tl
@@ -460,8 +465,16 @@
   bottom    = 6pt
 }
 
-% 参考文献引用宏包
-\usepackage[super,square]{natbib}
+% 方括号数字引用：自动排序，三个及以上连续编号合并为范围。
+\usepackage[numbers,square,sort&compress]{natbib}
+\ExplSyntaxOn
+\ctex_at_end_preamble:n
+  {
+    \bool_if:NTF \g__swufe_citation_superscript_bool
+      { \setcitestyle{super,square,comma} }
+      { \setcitestyle{numbers,square,comma} }
+  }
+\ExplSyntaxOff
 \AtBeginEnvironment{thebibliography}{\singlespacing}
 
 % 图像路径

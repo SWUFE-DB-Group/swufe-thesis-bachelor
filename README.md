@@ -70,6 +70,7 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 | 字段 | 用途 |
 | --- | --- |
 | `review` | 是否启用盲审模式，取 `true` 或 `false` |
+| `citation_superscript` | 文献引用是否使用上标；默认 `false`（非上标），设为 `true` 启用上标 |
 | `info.title.zh` / `info.title.en` | 中英文完整论文标题 |
 | `info.title.display_zh` | 封面题目的第一行；留空则使用完整中文标题 |
 | `info.title.display_zh_line2` | 封面题目的第二行；留空则只显示一行 |
@@ -111,6 +112,17 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 参考文献在 `contents/参考文献.tex` 中使用 `thebibliography` 和 `\bibitem` 手工维护，通过 `\cite{文献键}` 引用。当前模板不使用 `.bib` 数据库，也不需要额外运行 BibTeX 或 Biber。
 
+正文引用默认使用非上标的方括号数字。若需上标引用，在 `config.json` 中将 `citation_superscript` 设为 `true`；该字段省略或设为 `false` 时均使用非上标。引用命令保持一致，例如：
+
+```latex
+分类与回归等机器学习方法为模型构建提供了基础\cite{西瓜书}。
+相关概念和训练方法可参考教材\cite{西瓜书,深度学习图书}。
+网络结构设计可参考残差连接与批归一化方法\cite{ResNet,BatchNormalization}。
+残差网络、注意力机制与自适应优化可联合引用\cite{ResNet,Transformer,Adam}。
+```
+
+花括号中的文献键须与 `\bibitem{文献键}` 一致，多篇文献用逗号分隔。模板会自动按文献编号排序，两个编号用逗号分隔（如 `[1,2]`），三个及以上连续编号合并为横线连接的范围（如 `[7–9]`），不连续编号仍用逗号分隔（如 `[7,10]`）。这些规则同时适用于非上标和上标引用。绪论提供了单篇及多篇中文文献的引用示例，系统设计章节提供了英文文献及连续编号合并的示例。
+
 脚注使用 `\footnote{说明文字}` 插入。`setup.tex` 中的 `fnmark-style=plain` 将正文标记设为普通阿拉伯数字上标，`footmisc` 的 `perpage` 选项使每页从 1 开始编号。同一章的不同页面及下一章均提供了脚注示例；使用 `latexmk` 编译可自动完成逐页编号所需的多遍处理。
 
 ## 项目结构
@@ -119,7 +131,7 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 .
 ├── main.tex                 # 主文档与章节顺序
 ├── setup.tex                # 元数据读取、字体与版式配置
-├── config.json              # 论文信息与盲审开关
+├── config.json              # 论文信息、盲审开关与引用样式
 ├── contents/                # 封面、摘要、正文及其他章节
 ├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
 ├── font/                    # 华文中宋、华文仿宋与 Times New Roman 字体文件
