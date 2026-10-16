@@ -1,6 +1,8 @@
 # 西南财经大学本科毕业论文 LaTeX 模板
 
-用于撰写西南财经大学本科生毕业论文（设计），包含封面、学术声明、中英文摘要、目录、正文、参考文献、附录、致谢和封底。模板基于 SJTUTeX 的 `sjtuthesis` 文档类，在 `setup.tex` 中配置西南财经大学的版式与论文信息。
+用于撰写西南财经大学本科生毕业论文（设计），包含封面、学术声明、中英文摘要、目录、正文、参考文献、附录、致谢和封底。
+
+本项目基于 [SWUFE-DB-Group/SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 修改，该项目又基于[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 修改。底层使用 SJTUTeX 的 `sjtuthesis` 文档类，本项目在 `setup.tex` 中配置西南财经大学本科论文的版式与论文信息。
 
 ## 规范来源
 
@@ -33,11 +35,33 @@ make cleanall    # 同时删除 main.pdf
 
 Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 `latexmk` 命令。批处理脚本也支持 `Compile.bat clean` 和 `Compile.bat cleanall`。
 
+### Overleaf 等在线平台
+
+在线编译无需在本机安装 TeX。以 Overleaf 为例：
+
+1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`.latexmkrc`，以及完整的 `contents/`、`figures/`、`font/`、`texmf/` 目录。
+2. 在 Overleaf 中选择 **New Project → Upload Project**，上传 ZIP。确认 `main.tex` 位于项目根目录。
+3. 在在线项目根目录，将 `.latexmkrc` 重命名为 **`latexmkrc`**（去掉开头的点），保留其内容，使平台能够加载本地 `texmf/` 中的文档类和配置。
+4. 在项目设置中，将 **Main document** 设为 `main.tex`，**Compiler** 设为 **XeLaTeX**，并选择平台提供的较新 TeX Live 版本。
+5. 修改 `config.json` 和 `contents/` 中的论文内容，点击 **Recompile**，编译完成后下载 PDF。
+
+其他支持 XeLaTeX 的在线 LaTeX 平台可采用相同流程：上传完整项目、指定 `main.tex` 为主文档、选择 XeLaTeX，并确保平台读取项目中的 latexmk 配置。字体文件通过相对路径加载，需一并上传并保留原文件名。
+
+参考 Overleaf 官方文档：[上传项目](https://www.overleaf.com/learn/latex/Kb/Uploading_a_project)、[latexmkrc 配置](https://docs.overleaf.com/managing-projects-and-files/the-latexmkrc-file)、[编译器与 TeX Live 版本](https://docs.overleaf.com/getting-started/recompiling-your-project/selecting-a-tex-live-version-and-latex-compiler)。
+
 ### 字体
 
-`font/` 中的华文中宋和 Times New Roman 字体由模板直接通过文件路径加载，无需另行安装。华文中宋的粗体使用合成加粗。
+仓库的 `font/` 目录已包含以下字体，由模板直接通过文件路径加载，无需另行安装：
 
-封面字段优先使用 `font/STFANGSO.TTF`（华文仿宋）；未提供该文件时，使用 TeX 发行版中的 Fandol 仿宋。`texmf/` 内保留文档类按操作系统和字体选项加载的配置文件。
+| 字体文件 | 用途 |
+| --- | --- |
+| `STZHONGS.TTF` | 华文中宋，用于封面主标题及章节等标题 |
+| `STFANGSO.TTF` | 华文仿宋，用于封面信息栏与日期 |
+| `Times New Roman*.ttf` | Times New Roman 的常规、粗体、斜体及粗斜体，用于西文与数字 |
+
+华文中宋标题和华文仿宋日期的粗体使用合成加粗。文件名须与配置一致，尤其注意 Linux 下的大小写。
+
+`texmf/` 内保留文档类按操作系统和字体选项加载的配置文件。
 
 ## 填写论文信息
 
@@ -96,7 +120,7 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 ├── config.json              # 论文信息与盲审开关
 ├── contents/                # 封面、摘要、正文及其他章节
 ├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
-├── font/                    # 华文中宋与 Times New Roman 字体文件
+├── font/                    # 华文中宋、华文仿宋与 Times New Roman 字体文件
 ├── texmf/                   # 本地 SJTUTeX 论文文档类及其配置
 ├── .latexmkrc               # 编译引擎与本地依赖搜索路径
 ├── .gitignore               # 编译产物与编辑器临时文件忽略规则
@@ -109,4 +133,4 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 ## 许可与致谢
 
-项目许可证见 [LICENSE](LICENSE)。本地 SJTUTeX 文件保留其原有的 LaTeX Project Public License 声明，感谢原项目作者提供文档类基础。
+项目许可证见 [LICENSE](LICENSE)。感谢 [SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 及其所基于的[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 的作者。本地 SJTUTeX 文件保留其原有的 LaTeX Project Public License 声明。
