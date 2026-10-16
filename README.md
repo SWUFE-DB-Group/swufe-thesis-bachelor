@@ -2,6 +2,8 @@
 
 用于撰写西南财经大学本科生毕业论文（设计），包含封面、学术声明、中英文摘要、目录、正文、参考文献、附录、致谢和封底。
 
+**[预览模板效果（PDF）](example.pdf)**
+
 本项目基于 [SWUFE-DB-Group/SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 修改，该项目又基于[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 修改。底层使用 SJTUTeX 的 `sjtuthesis` 文档类，本项目在 `setup.tex` 中配置西南财经大学本科论文的版式与论文信息。
 
 ## 规范来源
@@ -217,6 +219,7 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 ```text
 .
+├── example.pdf              # 可直接预览的模板示例
 ├── main.tex                 # 主文档与章节顺序
 ├── setup.tex                # 元数据读取、字体与版式配置
 ├── config.json              # 论文信息、盲审开关与引用样式
@@ -233,7 +236,7 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 └── LICENSE
 ```
 
-学术声明与封底分别通过 `contents/学术声明.tex`、`contents/封底.tex` 嵌入 `figures/copyright.pdf` 和 `figures/last.pdf`。这些 PDF 是编译输入，应与源代码一起保留。生成的 `main.pdf` 和编译中间文件由 `.gitignore` 忽略。
+学术声明与封底分别通过 `contents/学术声明.tex`、`contents/封底.tex` 嵌入 `figures/copyright.pdf` 和 `figures/last.pdf`。这些 PDF 是编译输入，应与源代码一起保留。`example.pdf` 是纳入版本管理的效果示例，修改模板排版后应重新编译并用 `main.pdf` 更新。生成的 `main.pdf` 和编译中间文件由 `.gitignore` 忽略。
 
 ## 开发检查
 
