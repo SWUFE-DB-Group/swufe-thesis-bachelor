@@ -1,6 +1,11 @@
 {
   "review": false,
   "citation_superscript": false,
+  "bibliography": {
+    "source": "bib",
+    "bib_file": "refs.bib",
+    "tex_file": "contents/参考文献.tex"
+  },
   "info": {
     "title": "西南财经大学本科毕业论文（设计）\\LaTeX{} 模板示例文档",
     "display_title": "西南财经大学本科毕业论文（设计）",

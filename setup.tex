@@ -15,11 +15,23 @@
 \tl_new:N \l__swufe_info_display_title_tl
 \tl_new:N \l__swufe_info_title_second_tl
 \bool_new:N \g__swufe_citation_superscript_bool
+\bool_new:N \g__swufe_bibliography_bib_bool
+\tl_new:N \l__swufe_bibliography_bib_file_tl
+\tl_new:N \l__swufe_bibliography_tex_file_tl
 
 \keys_define:nn { sjtu }
   {
     review              .bool_gset:N = \g__sjtu_review_bool ,
     citation-superscript .bool_gset:N = \g__swufe_citation_superscript_bool ,
+    bibliography .meta:nn = { sjtu / bibliography } {#1} ,
+  }
+\keys_define:nn { sjtu / bibliography }
+  {
+    source .choice: ,
+    source / bib .code:n = { \bool_gset_true:N \g__swufe_bibliography_bib_bool } ,
+    source / tex .code:n = { \bool_gset_false:N \g__swufe_bibliography_bib_bool } ,
+    bib-file .tl_set:N = \l__swufe_bibliography_bib_file_tl ,
+    tex-file .tl_set:N = \l__swufe_bibliography_tex_file_tl ,
   }
 \keys_define:nn { sjtu / info }
   {
@@ -74,6 +86,11 @@
 \swufesetup{
   review = false,
   citation-superscript = false,
+  bibliography = {
+    source = bib,
+    bib-file = refs.bib,
+    tex-file = contents/参考文献.tex,
+  },
   info = {
     title         = {西南财经大学本科毕业论文（设计）\LaTeX{} 模板示例文档},
     display-title = {西南财经大学本科毕业论文（设计）},
@@ -115,6 +132,13 @@
         { citation-superscript } { citation_superscript }
       }
       { \__swufe_load_json_field:nnn { sjtu } #1 }
+    \clist_map_inline:nn
+      {
+        { source }   { bibliography.source } ,
+        { bib-file } { bibliography.bib_file } ,
+        { tex-file } { bibliography.tex_file }
+      }
+      { \__swufe_load_json_field:nnn { sjtu / bibliography } #1 }
     \clist_map_inline:nn
       {
         { title }         { info.title } ,
@@ -415,6 +439,29 @@
   }
 \ExplSyntaxOff
 \AtBeginEnvironment{thebibliography}{\singlespacing}
+
+% 两种来源共用 natbib 和正文引用设置；BibTeX 方式按中文优先排序。
+\ExplSyntaxOn
+\NewDocumentCommand{\printswufebibliography}{}{
+  \bool_if:NTF \g__swufe_bibliography_bib_bool
+    {
+      \file_if_exist:VTF \l__swufe_bibliography_bib_file_tl
+        {
+          \phantomsection
+          \addcontentsline{toc}{chapter}{参考文献}
+          \bibliographystyle{swufe-gbt7714-numerical}
+          \exp_args:NV \bibliography \l__swufe_bibliography_bib_file_tl
+        }
+        {
+          \PackageWarning{swufe}{Bibliography~file~
+            '\tl_use:N \l__swufe_bibliography_bib_file_tl'~not~found;~using~
+            '\tl_use:N \l__swufe_bibliography_tex_file_tl'}
+          \exp_args:NV \file_input:n \l__swufe_bibliography_tex_file_tl
+        }
+    }
+    { \exp_args:NV \file_input:n \l__swufe_bibliography_tex_file_tl }
+}
+\ExplSyntaxOff
 
 % 图像路径
 \graphicspath{{figures/}}

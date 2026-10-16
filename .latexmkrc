@@ -8,6 +8,7 @@ $ENV{'TZ'} = 'Asia/Shanghai';
 
 # Prepended local directories to the search paths.
 ensure_path( 'TEXINPUTS', './texmf//' );
+ensure_path( 'BSTINPUTS', './texmf/bibtex/bst/swufe' );
 # ensure_path( 'OSFONTDIR', './texmf/fonts//' );
 
 # PDF generate method:

@@ -14,7 +14,7 @@
 
 ## 编译
 
-需要安装包含 **XeLaTeX** 和 **latexmk** 的 TeX 发行版，以及 `ctex`、`fontspec`、`xeCJK`、`jsonparse`、`newtx`、`tikz`、`pgfplots` 等依赖。使用较新的完整 TeX Live 可减少缺少宏包的问题。
+需要安装包含 **XeLaTeX**、**BibTeX** 和 **latexmk** 的 TeX 发行版，以及 `ctex`、`fontspec`、`xeCJK`、`jsonparse`、`newtx`、`tikz`、`pgfplots` 等依赖。使用较新的完整 TeX Live 可减少缺少宏包的问题。
 
 在项目根目录执行：
 
@@ -22,7 +22,7 @@
 latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.tex
 ```
 
-生成文件为 `main.pdf`。`latexmk` 会读取 `.latexmkrc`，自动设置本地 `texmf/` 的搜索路径，并按需重复编译以更新目录、引用和页码。
+生成文件为 `main.pdf`。`latexmk` 会读取 `.latexmkrc`，自动设置本地文档类和参考文献样式的搜索路径，按需运行 BibTeX，并重复编译以更新目录、引用和页码；无需使用 Biber。
 
 Linux / macOS 也可以使用：
 
@@ -39,9 +39,9 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 在线编译无需在本机安装 TeX。以 Overleaf 为例：
 
-1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`.latexmkrc`，以及完整的 `contents/`、`figures/`、`font/`、`texmf/` 目录。
+1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、`.latexmkrc`，以及完整的 `contents/`、`figures/`、`font/`、`texmf/` 目录。
 2. 在 Overleaf 中选择 **New Project → Upload Project**，上传 ZIP。确认 `main.tex` 位于项目根目录。
-3. 在在线项目根目录，将 `.latexmkrc` 重命名为 **`latexmkrc`**（去掉开头的点），保留其内容，使平台能够加载本地 `texmf/` 中的文档类和配置。
+3. 在在线项目根目录，将 `.latexmkrc` 重命名为 **`latexmkrc`**（去掉开头的点），保留其内容，使平台能够加载本地 `texmf/` 中的文档类、配置和 BibTeX 样式。
 4. 在项目设置中，将 **Main document** 设为 `main.tex`，**Compiler** 设为 **XeLaTeX**，并选择平台提供的较新 TeX Live 版本。
 5. 修改 `config.json` 和 `contents/` 中的论文内容，点击 **Recompile**，编译完成后下载 PDF。
 
@@ -71,6 +71,9 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 | --- | --- |
 | `review` | 是否启用盲审模式，取 `true` 或 `false` |
 | `citation_superscript` | 文献引用是否使用上标；默认 `false`（非上标），设为 `true` 启用上标 |
+| `bibliography.source` | 参考文献来源，默认 `"bib"`；设为 `"tex"` 使用手工参考文献 |
+| `bibliography.bib_file` | BibTeX 数据库路径，默认 `"refs.bib"` |
+| `bibliography.tex_file` | 手工参考文献路径，默认 `"contents/参考文献.tex"` |
 | `info.title` | 完整论文标题，用于页眉和 PDF 元数据 |
 | `info.display_title` | 封面题目的第一行；省略或留空则使用完整标题 |
 | `info.title_second` | 封面题目的第二行；省略或留空则只显示一行 |
@@ -115,18 +118,51 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 外部图片中已经绘制的文字需要在制图软件中设置字号；LaTeX 的字体设置只作用于其排版的文字。
 
-参考文献在 `contents/参考文献.tex` 中使用 `thebibliography` 和 `\bibitem` 手工维护，通过 `\cite{文献键}` 引用。当前模板不使用 `.bib` 数据库，也不需要额外运行 BibTeX 或 Biber。
+### 参考文献来源
+
+默认从 `refs.bib` 读取文献，由 BibTeX 按 **GB/T 7714-2015 顺序编码制**生成参考文献表。配置如下：
+
+```json
+"bibliography": {
+  "source": "bib",
+  "bib_file": "refs.bib",
+  "tex_file": "contents/参考文献.tex"
+}
+```
+
+将 `source` 改为 `"tex"`，即可使用 `contents/参考文献.tex` 中的 `thebibliography` 和 `\bibitem` 手工维护参考文献，格式与顺序需自行维护。选择 `"bib"` 但指定的 `.bib` 文件不存在时，模板会提示警告并自动读取 `tex_file`。两种来源使用相同的 `\cite{文献键}` 命令。
+
+`.bib` 模式自动保证**中文在前、外文在后，各组内部按正文首次引用的顺序排列**，全部条目从 `[1]` 连续编号。即使先引用英文文献，文末仍先列中文文献；数据库中的录入顺序不会影响这一规则。默认只列出被引用的条目，需要列出未引用文献时可使用 `\nocite{文献键}` 或 `\nocite{*}`。
+
+可参考 `refs.bib` 中的条目添加文献，例如：
+
+```bibtex
+@book{西瓜书,
+  author    = {周志华},
+  title     = {机器学习},
+  address   = {北京},
+  publisher = {清华大学出版社},
+  year      = {2016},
+  language  = {chinese}
+}
+```
+
+`language` 可设为 `chinese` 或 `english`；省略时，样式会根据作者、标题等内容自动识别。多人作者用 `and` 分隔。语言字段用于文献排序与著录格式，不需要为同一条文献填写中英文两套信息。
+
+本项目的 `swufe-gbt7714-numerical.bst` 基于 [gbt7714-bibtex-style](https://github.com/zepinglee/gbt7714-bibtex-style) 的 GB/T 7714-2015 样式修改，仅增加中文优先排序，保留国标著录格式。
+
+### 正文引用
 
 正文引用默认使用非上标的方括号数字。若需上标引用，在 `config.json` 中将 `citation_superscript` 设为 `true`；该字段省略或设为 `false` 时均使用非上标。引用命令保持一致，例如：
 
 ```latex
 分类与回归等机器学习方法为模型构建提供了基础\cite{西瓜书}。
 相关概念和训练方法可参考教材\cite{西瓜书,深度学习图书}。
-网络结构设计可参考残差连接与批归一化方法\cite{ResNet,BatchNormalization}。
 残差网络、注意力机制与自适应优化可联合引用\cite{ResNet,Transformer,Adam}。
+网络结构设计可参考残差连接与批归一化方法\cite{ResNet,BatchNormalization}。
 ```
 
-花括号中的文献键须与 `\bibitem{文献键}` 一致，多篇文献用逗号分隔。模板会自动按文献编号排序，两个编号用逗号分隔（如 `[1,2]`），三个及以上连续编号合并为横线连接的范围（如 `[7–9]`），不连续编号仍用逗号分隔（如 `[7,10]`）。这些规则同时适用于非上标和上标引用。绪论提供了单篇及多篇中文文献的引用示例，系统设计章节提供了英文文献及连续编号合并的示例。
+花括号中的文献键须与 `.bib` 中的条目键或 `\bibitem{文献键}` 一致，多篇文献用逗号分隔。模板会自动按文献编号排序，两个编号用逗号分隔（如 `[1,2]`），三个及以上连续编号合并为横线连接的范围（如 `[3–5]`），不连续编号仍用逗号分隔（如 `[4,6]`）。这些规则同时适用于非上标和上标引用。具体编号由当前参考文献来源决定，正文无需手工维护。绪论提供了单篇及多篇中文文献的引用示例，系统设计章节提供了英文文献及连续编号合并的示例。
 
 脚注使用 `\footnote{说明文字}` 插入。`setup.tex` 中的 `fnmark-style=plain` 将正文标记设为普通阿拉伯数字上标，`footmisc` 的 `perpage` 选项使每页从 1 开始编号。同一章的不同页面及下一章均提供了脚注示例；使用 `latexmk` 编译可自动完成逐页编号所需的多遍处理。
 
@@ -137,10 +173,11 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 ├── main.tex                 # 主文档与章节顺序
 ├── setup.tex                # 元数据读取、字体与版式配置
 ├── config.json              # 论文信息、盲审开关与引用样式
+├── refs.bib                 # 默认的参考文献数据库
 ├── contents/                # 封面、摘要、正文及其他章节
 ├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
 ├── font/                    # 华文中宋、华文仿宋与 Times New Roman 字体文件
-├── texmf/                   # 本地 SJTUTeX 论文文档类及其配置
+├── texmf/                   # 本地论文文档类、配置与 GB/T 7714 BibTeX 样式
 ├── .latexmkrc               # 编译引擎与本地依赖搜索路径
 ├── .gitignore               # 编译产物与编辑器临时文件忽略规则
 ├── Makefile                 # make 编译入口
@@ -152,4 +189,4 @@ Windows 可在命令提示符中运行 `Compile.bat`，或直接使用上面的 
 
 ## 许可与致谢
 
-项目许可证见 [LICENSE](LICENSE)。感谢 [SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 及其所基于的[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 的作者。本地 SJTUTeX 文件保留其原有的 LaTeX Project Public License 声明。
+项目许可证见 [LICENSE](LICENSE)。感谢 [SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 及其所基于的[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 的作者，以及 [gbt7714-bibtex-style](https://github.com/zepinglee/gbt7714-bibtex-style) 的维护者。本地 SJTUTeX 文件和修改后的 BibTeX 样式保留其原有的 LaTeX Project Public License 声明。
