@@ -2,7 +2,7 @@
 
 用于撰写西南财经大学本科生毕业论文（设计），包含封面、学术声明、中英文摘要、目录、正文、参考文献、附录、致谢和封底。
 
-**[预览模板效果（PDF）](example.pdf)**
+**[预览模板效果（PDF）](https://github.com/SWUFE-DB-Group/swufe-thesis-bachelor/blob/main/example.pdf)**
 
 本项目基于 [SWUFE-DB-Group/SWUFE-Thesis](https://github.com/SWUFE-DB-Group/SWUFE-Thesis) 修改，该项目又基于[上海交通大学论文模板 SJTUThesis](https://github.com/sjtug/SJTUThesis) 修改。底层使用 SJTUTeX 的 `sjtuthesis` 文档类，本项目在 `setup.tex` 中配置西南财经大学本科论文的版式与论文信息。
 
@@ -13,6 +13,17 @@
 - [规范来源：西南财经大学计算机与人工智能学院](https://it.swufe.edu.cn/info/1166/22938.htm)
 
 提交论文时，请结合学院当年的具体要求检查最终稿。
+
+## 下载发布版本
+
+GitHub **Releases** 中提供两种 ZIP：
+
+| 文件名后缀 | 内容 |
+| --- | --- |
+| `-with-font.zip` | 模板源码、编译脚本和 `font/` 字体文件，适合希望保留示例字体的用户 |
+| `-without-font.zip` | 相同的模板源码和编译脚本，省略 `font/`，自动使用系统字体或 TeX 发行版中的替代字体 |
+
+两个 ZIP 都保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、自定义文献样式、`contents/`、`figures/`、使用说明和许可证。`main.tex` 位于 ZIP 根目录，便于解压后本地编译或直接上传 Overleaf。ZIP 不包含 `example.pdf`、编译产物、测试及工作流文件；效果预览可查看仓库中的 [example.pdf](https://github.com/SWUFE-DB-Group/swufe-thesis-bachelor/blob/main/example.pdf)。
 
 ## 编译环境与版本要求
 
@@ -232,13 +243,34 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 ├── swufe-gbt7714-numerical.bst # 中文优先的 GB/T 7714 BibTeX 样式
 ├── .latexmkrc               # 本地 XeLaTeX / BibTeX 编译配置
 ├── .gitignore               # 编译产物与编辑器临时文件忽略规则
-├── tests/                   # 版本迁移与编译检查
+├── tests/                   # 版本迁移、编译和打包检查
+├── scripts/                 # 发布 ZIP 打包脚本
+├── .github/workflows/        # tag 触发的 Release 工作流
 ├── Makefile                 # make 编译入口
 ├── Compile.bat              # Windows 编译入口
 └── LICENSE
 ```
 
 学术声明与封底分别通过 `contents/学术声明.tex`、`contents/封底.tex` 嵌入 `figures/copyright.pdf` 和 `figures/last.pdf`。这些 PDF 是编译输入，应与源代码一起保留。`example.pdf` 是纳入版本管理的效果示例，修改模板排版后应重新编译并用 `main.pdf` 更新。生成的 `main.pdf` 和编译中间文件由 `.gitignore` 忽略。
+
+## 发布版本
+
+`.github/workflows/release.yml` 在推送任意 tag 时触发，创建对应的 GitHub Release，并上传两个 ZIP。例如：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+该示例生成 `SWUFE-Thesis-Bachelor-v1.0.0-with-font.zip` 和 `SWUFE-Thesis-Bachelor-v1.0.0-without-font.zip`。工作流使用内置的 `GITHUB_TOKEN` 和 `contents: write` 权限，无需额外配置令牌；同一 tag 的工作流重跑时，会更新已有 Release 中同名的 ZIP 附件。工作流打包 tag 对应的已跟踪模板文件，不在发布时重新编译论文。
+
+也可在项目根目录本地生成 ZIP：
+
+```bash
+python3 scripts/package_release.py v1.0.0
+```
+
+文件默认输出到 `build/release/`；可通过 `--output-dir` 指定其他目录。打包要求六个随项目提供的字体文件完整，以确保 `with-font` 包含完整字体组。
 
 ## 开发检查
 
@@ -248,7 +280,7 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 python3 -m unittest discover -s tests -v
 ```
 
-检查需要 Python 3、XeLaTeX、BibTeX、latexmk 和 Poppler（`pdfinfo`、`pdftotext`、`pdftohtml`、`pdffonts`）。脚本在临时目录中编译，不读取项目的 `.latexmkrc`，验证发行版文档类、JSON 与默认配置、盲审元数据、两种文献来源、字体回退、字体字号、页边距及脚注间距。
+检查需要 Python 3、XeLaTeX、BibTeX、latexmk 和 Poppler（`pdfinfo`、`pdftotext`、`pdftohtml`、`pdffonts`）。编译检查在临时目录中运行，不读取项目的 `.latexmkrc`，验证发行版文档类、JSON 与默认配置、盲审元数据、两种文献来源、字体回退、字体字号、页边距及脚注间距。打包检查另外需要 Git，可单独运行 `python3 -m unittest discover -s tests -p test_release.py -v`，无需安装 TeX。
 
 ## 许可与致谢
 
