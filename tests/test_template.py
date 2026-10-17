@@ -15,7 +15,7 @@ import xml.etree.ElementTree as ET
 
 
 ROOT = Path(__file__).resolve().parents[1]
-TOOLS = ("xelatex", "bibtex", "latexmk", "pdfinfo", "pdftotext", "pdftohtml")
+TOOLS = ("xelatex", "bibtex", "latexmk", "pdfinfo", "pdftotext", "pdftohtml", "pdffonts")
 
 
 @unittest.skipUnless(all(shutil.which(t) for t in TOOLS), "TeX/Poppler required")
@@ -104,6 +104,54 @@ class TemplateTests(unittest.TestCase):
         for value in ("张三", "李四教授", "42100001", "2026年5月", "关键词："):
             self.assertIn(value, self.compact)
         self.assert_bib_order()
+
+    def force_no_system_fonts(self):
+        # Exercise distribution fallbacks even on hosts with installed Microsoft fonts.
+        path = self.project / "main.tex"
+        path.write_text(path.read_text().replace(
+            r"\input{setup}",
+            r"\RenewDocumentCommand{\IfFontExistsTF}{m m m}{#3}" "\n" r"\input{setup}",
+        ))
+
+    def embedded_fonts(self):
+        return subprocess.check_output(
+            ["pdffonts", str(self.project / "main.pdf")], text=True
+        )
+
+    def test_no_font_directory(self):
+        (self.project / "font").unlink()  # Remove this copy's symlink, not repo fonts.
+        self.build()
+        self.assertIn("迁移TestTitle", self.compact)
+        self.assert_bib_order()
+
+    def test_empty_font_directory_and_no_system_fonts(self):
+        (self.project / "font").unlink()
+        (self.project / "font").mkdir()
+        self.force_no_system_fonts()
+        log = self.build()
+        for message in ("using TeX Gyre TermesX", "using FandolSong", "using FandolFang"):
+            self.assertIn(message, log)
+        fonts = self.embedded_fonts()
+        for family in ("TeXGyreTermesX-Regular", "TeXGyreTermesX-Bold",
+                       "TeXGyreTermesX-Italic", "FandolSong-Bold", "FandolFang"):
+            self.assertIn(family, fonts)
+        for family in ("TimesNewRoman", "STZhongsong", "STFangsong"):
+            self.assertNotIn(family, fonts)
+        self.assert_bib_order()
+
+    def test_partial_times_family_falls_back_together(self):
+        (self.project / "font").unlink()
+        (self.project / "font").mkdir()
+        for path in (ROOT / "font").iterdir():
+            if path.name != "Times New Roman Bold.ttf":
+                (self.project / "font" / path.name).symlink_to(path)
+        self.force_no_system_fonts()
+        self.build()
+        fonts = self.embedded_fonts()
+        self.assertIn("TeXGyreTermesX-Regular", fonts)
+        self.assertIn("TeXGyreTermesX-Bold", fonts)
+        self.assertIn("STZhongsong", fonts)
+        self.assertNotIn("TimesNewRoman", fonts)
 
     def test_manual_bibliography_and_superscript(self):
         self.config["bibliography"]["source"] = "tex"

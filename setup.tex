@@ -207,37 +207,75 @@
 % ---------------------------------------------------------
 \usepackage{fontspec}
 
-% 西文字体设为 Times New Roman
-\setmainfont[
-  Path = font/,
-  UprightFont    = {Times New Roman.ttf},
-  BoldFont       = {Times New Roman Bold.ttf},
-  ItalicFont     = {Times New Roman Italic.ttf},
-  BoldItalicFont = {Times New Roman Bold Italic.ttf}
-]{}
+% 西文字体：完整的项目字体组 -> 系统 Times New Roman -> TeX Gyre TermesX。
+% 四种字形作为一组检查，缺少任意文件时整组回退，避免粗体或斜体加载失败。
+\newif\ifswufetimesfiles
+\swufetimesfilestrue
+\IfFileExists{font/Times New Roman.ttf}{}{\swufetimesfilesfalse}
+\IfFileExists{font/Times New Roman Bold.ttf}{}{\swufetimesfilesfalse}
+\IfFileExists{font/Times New Roman Italic.ttf}{}{\swufetimesfilesfalse}
+\IfFileExists{font/Times New Roman Bold Italic.ttf}{}{\swufetimesfilesfalse}
+\ifswufetimesfiles
+  \setmainfont[
+    Path = font/,
+    UprightFont    = {Times New Roman.ttf},
+    BoldFont       = {Times New Roman Bold.ttf},
+    ItalicFont     = {Times New Roman Italic.ttf},
+    BoldItalicFont = {Times New Roman Bold Italic.ttf}
+  ]{}
+\else
+  \IfFontExistsTF{Times New Roman}{
+    \setmainfont{Times New Roman}
+  }{
+    \setmainfont[
+      Extension = .otf,
+      UprightFont = *-Regular,
+      BoldFont = *-Bold,
+      ItalicFont = *-Italic,
+      BoldItalicFont = *-BoldItalic
+    ]{TeXGyreTermesX}
+    \PackageWarningNoLine{swufe}{Times New Roman unavailable; using TeX Gyre TermesX}
+  }
+\fi
 
-% 华文中宋 (STZHONGS.TTF)
-% 华文中宋只有常规字重；显式提供合成粗体，避免 \bfseries 静默回退。
-\setCJKfamilyfont{zhongsong}[
-  Path=font/,
-  AutoFakeBold=2.5
-]{STZHONGS.TTF}
+% 一级标题字体：项目华文中宋 -> 系统华文中宋 -> Fandol 宋体。
+% 华文中宋没有独立粗体，使用合成加粗；Fandol 使用其自带粗体。
+\IfFileExists{font/STZHONGS.TTF}{
+  \setCJKfamilyfont{zhongsong}[Path=font/,AutoFakeBold=2.5]{STZHONGS.TTF}
+}{
+  \IfFontExistsTF{STZhongsong}{
+    \setCJKfamilyfont{zhongsong}[AutoFakeBold=2.5]{STZhongsong}
+  }{
+    \setCJKfamilyfont{zhongsong}[BoldFont=FandolSong-Bold.otf]{FandolSong-Regular.otf}
+    \PackageWarningNoLine{swufe}{STZhongsong unavailable; using FandolSong}
+  }
+}
 \newcommand{\zhongsong}{\CJKfamily{zhongsong}}
 
-% 华文仿宋 / 仿宋回退定义（用于封面字段）
-% 仿宋通常也没有独立粗体字形，封面日期需要可用的粗体。
-\setCJKfamilyfont{hwfangsong}[AutoFakeBold=2]{FandolFang-Regular.otf}
-\newcommand{\hwfangsong}{\CJKfamily{hwfangsong}}
+% 封面字体：项目华文仿宋 -> 系统华文仿宋 -> Fandol 仿宋。
 \IfFileExists{font/STFANGSO.TTF}{
   \setCJKfamilyfont{hwfangsong}[Path=font/,AutoFakeBold=2]{STFANGSO.TTF}
-}{}
+}{
+  \IfFontExistsTF{STFangsong}{
+    \setCJKfamilyfont{hwfangsong}[AutoFakeBold=2]{STFangsong}
+  }{
+    \setCJKfamilyfont{hwfangsong}[AutoFakeBold=2]{FandolFang-Regular.otf}
+    \PackageWarningNoLine{swufe}{STFangsong unavailable; using FandolFang}
+  }
+}
+\newcommand{\hwfangsong}{\CJKfamily{hwfangsong}}
 
 % 华文行楷 / 楷书回退定义（用于封底校训竖排）
 \providecommand{\hwxingkai}{\kaishu}
 \IfFileExists{font/STXINGKA.TTF}{
   \setCJKfamilyfont{hwxingkai}[Path=font/]{STXINGKA.TTF}
   \renewcommand{\hwxingkai}{\CJKfamily{hwxingkai}}
-}{}
+}{
+  \IfFontExistsTF{STXingkai}{
+    \setCJKfamilyfont{hwxingkai}{STXingkai}
+    \renewcommand{\hwxingkai}{\CJKfamily{hwxingkai}}
+  }{}
+}
 
 % ---------------------------------------------------------
 % 6. 行距与段落格式

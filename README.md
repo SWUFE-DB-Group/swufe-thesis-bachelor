@@ -83,26 +83,28 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 在线编译无需在本机安装 TeX。以 Overleaf 为例：
 
-1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、`swufe-gbt7714-numerical.bst`，以及完整的 `contents/`、`figures/`、`font/` 目录。
+1. 将项目源文件打包为 ZIP，保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、`swufe-gbt7714-numerical.bst`，以及完整的 `contents/`、`figures/` 目录；`font/` 为可选目录，保留它可使用示例中的原字体。
 2. 在 Overleaf 中选择 **New Project → Upload Project**，上传 ZIP。确认 `main.tex` 位于项目根目录。
 3. 在项目设置中，将 **Main document** 设为 `main.tex`，**Compiler** 设为 **XeLaTeX**，**TeX Live version** 设为 **2026**。该流程直接使用平台提供的 SJTUTeX，无需上传 `texmf/`，也无需创建或重命名 `latexmkrc`；仓库的 `.latexmkrc` 用于本地脚本编译。
 4. 修改 `config.json` 和 `contents/` 中的论文内容，点击 **Recompile**，编译完成后下载 PDF。若提示 `SJTUTeX 2.3.1 or newer is required`，请检查 TeX Live 版本，并清除项目中残留的旧文档类。
 
-其他在线平台同样需要满足 SJTUTeX 版本要求，上传完整项目并选择 XeLaTeX。字体文件通过相对路径加载，需保留原文件名。
+其他在线平台同样需要满足 SJTUTeX 版本要求，上传项目并选择 XeLaTeX。`font/` 可省略；若提供字体文件，需保留原文件名。
 
 参考 Overleaf 官方文档：[上传项目](https://www.overleaf.com/learn/latex/Kb/Uploading_a_project)、[TeX Live 2026 公告](https://www.overleaf.com/blog/tex-live-2026-is-now-available)、[编译器与 TeX Live 版本](https://docs.overleaf.com/getting-started/recompiling-your-project/selecting-a-tex-live-version-and-latex-compiler)。
 
 ### 字体
 
-仓库的 `font/` 目录已包含以下字体，由模板直接通过文件路径加载，无需另行安装：
+模板优先使用 `font/` 中的字体；文件缺失时查找同名系统字体，仍不可用时采用 TeX 发行版中的替代字体。即使整个 `font/` 目录不存在，也能在满足上述依赖要求的环境中编译。
 
-| 字体文件 | 用途 |
-| --- | --- |
-| `STZHONGS.TTF` | 华文中宋，用于封面主标题及章节等标题 |
-| `STFANGSO.TTF` | 华文仿宋，用于封面信息栏与日期 |
-| `Times New Roman*.ttf` | Times New Roman 的常规、粗体、斜体及粗斜体，用于西文与数字 |
+| 项目字体文件 | 用途 | 回退顺序 |
+| --- | --- | --- |
+| `STZHONGS.TTF` | 封面主标题及一级标题等的华文中宋 | 系统 `STZhongsong` → Fandol 宋体 |
+| `STFANGSO.TTF` | 封面信息栏与日期的华文仿宋 | 系统 `STFangsong` → Fandol 仿宋 |
+| `Times New Roman*.ttf` | 西文与数字的常规、粗体、斜体、粗斜体 | 系统 Times New Roman → TeX Gyre TermesX |
 
-华文中宋标题和华文仿宋日期的粗体使用合成加粗。文件名须与配置一致，尤其注意 Linux 下的大小写。
+Times New Roman 的四个文件作为一组加载，缺少任意一个时整组回退。华文中宋与华文仿宋的粗体使用合成加粗，Fandol 宋体使用自带粗体。若提供字体文件，文件名须与配置一致，尤其注意 Linux 下的大小写。
+
+回退到替代字体时，编译日志会给出提示。替代字体与规范指定的原字体存在字形差异：Fandol 宋体并非华文中宋，Fandol 仿宋并非华文仿宋，TeX Gyre TermesX 并非 Times New Roman。需要保持指定字体及示例效果时，请保留项目字体或在系统中安装相应字体。
 
 正文宋体与标题黑体由发行版中的 SJTUTeX 字体方案提供：Windows 默认使用中易宋体、黑体，macOS 默认使用系统中文字体，其他系统默认使用 Fandol 宋体、黑体。
 
@@ -226,7 +228,7 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 ├── refs.bib                 # 默认的参考文献数据库
 ├── contents/                # 封面、摘要、正文及其他章节
 ├── figures/                 # 实际使用的校名、校徽、声明页、封底等素材
-├── font/                    # 华文中宋、华文仿宋与 Times New Roman 字体文件
+├── font/                    # 可选的华文中宋、华文仿宋与 Times New Roman 字体文件
 ├── swufe-gbt7714-numerical.bst # 中文优先的 GB/T 7714 BibTeX 样式
 ├── .latexmkrc               # 本地 XeLaTeX / BibTeX 编译配置
 ├── .gitignore               # 编译产物与编辑器临时文件忽略规则
@@ -246,7 +248,7 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 python3 -m unittest discover -s tests -v
 ```
 
-检查需要 Python 3、XeLaTeX、BibTeX、latexmk 和 Poppler（`pdfinfo`、`pdftotext`、`pdftohtml`）。脚本在临时目录中编译，不读取项目的 `.latexmkrc`，验证发行版文档类、JSON 与默认配置、盲审元数据、两种文献来源、字体字号、页边距及脚注间距。
+检查需要 Python 3、XeLaTeX、BibTeX、latexmk 和 Poppler（`pdfinfo`、`pdftotext`、`pdftohtml`、`pdffonts`）。脚本在临时目录中编译，不读取项目的 `.latexmkrc`，验证发行版文档类、JSON 与默认配置、盲审元数据、两种文献来源、字体回退、字体字号、页边距及脚注间距。
 
 ## 许可与致谢
 
