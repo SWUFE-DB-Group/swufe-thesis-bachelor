@@ -170,7 +170,7 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 
 ## 撰写正文与参考文献
 
-在 `contents/` 中修改各章内容；增加或删除章节时，同步调整 `main.tex` 中的 `\input{...}`。`contents/格式与规范指南.tex` 提供表格、插图、公式、脚注、算法和代码的示例。
+在 `contents/` 中修改各章内容；增加或删除章节时，同步调整 `main.tex` 中的 `\input{...}`。`contents/格式与规范指南.tex` 提供表格、插图、多行公式、分段函数、矩阵、定理与证明、TikZ 流程图、PGFPlots 曲线、脚注、算法和代码的示例。
 
 图表格式由 `setup.tex` 统一设置：
 
@@ -179,6 +179,23 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 - 图表内容为五号字体、单倍行距，无需在每个浮动体中重复设置。
 
 外部图片中已经绘制的文字需要在制图软件中设置字号；LaTeX 的字体设置只作用于其排版的文字。
+
+### 定理、证明与数学绘图
+
+`setup.tex` 已加载 `amsthm`，使用 SJTUTeX 自动提供的环境，无需自行重复定义：
+
+| 环境 | 用途 |
+| --- | --- |
+| `definition`、`lemma`、`theorem`、`corollary` | 定义、引理、定理、推论，各类按章独立编号 |
+| `example` | 带编号的例 |
+| `proof` | 无编号的证明，自动添加证毕符号 |
+| `remark` | 无编号的注 |
+
+例如 `\begin{theorem}[定理名称] ... \end{theorem}` 可添加名称，使用 `\label` 与 `\ref` 引用编号；证明末行是公式时，可用 `\qedhere` 将证毕符号放在该行。第二章包含一组完整的定义、引理、定理、证明、推论及数值示例，并演示 `align`、`cases` 和 `bmatrix`。
+
+TikZ 示例包含节点、箭头与条件分支；PGFPlots 示例直接绘制两条几何衰减序列。两种图都放在 `figure` 环境中，图中文字使用五号、单倍行距，图题在下方。可修改节点文字、连接关系、函数或数据绘制自己的图，无需外部绘图文件或 shell escape。
+
+环境用法参考 [SJTUTeX](https://github.com/sjtug/SJTUTeX) 及 [SJTUThesis 数学示例](https://github.com/sjtug/SJTUThesis/blob/master/contents/math_and_citations.tex)，本项目的数学推导和图形示例在 `contents/格式与规范指南.tex` 中维护。
 
 ### 参考文献来源
 

@@ -78,7 +78,9 @@ class TemplateTests(unittest.TestCase):
     def test_json_final_without_search_paths(self):
         self.build()
         for value in ("迁移TestTitle", "迁移作者", "迁移导师", "2099123456",
-                      "迁移学院", "迁移关键词；排序校验", "Keywords:", "ABSTRACT"):
+                      "迁移学院", "迁移关键词；排序校验", "Keywords:", "ABSTRACT",
+                      "定义2.1", "引理2.1", "定理2.1", "推论2.1",
+                      "人工复核", "两种几何衰减序列的对比"):
             self.assertIn(value, self.compact)
         self.assertIn("迁移 Test Title", self.info)  # JSON spaces survive rescanning.
         self.assertRegex(self.info, r"Author: +迁移作者")

@@ -129,3 +129,190 @@ class ResidualBlock(nn.Module):
         out += residual  # 残差跳跃连接
         return self.relu(out)
 \end{codeblock}
+
+\section{数学推导与定理环境}
+
+\subsection{多行公式、分段函数与矩阵}
+
+多行推导可使用 \texttt{align} 环境，在等号处用符号 \texttt{\&} 对齐。
+例如，二次损失函数的梯度可写为
+\begin{align}
+\mathcal{L}(\boldsymbol{w})
+  &= \frac{1}{2n}\lVert X\boldsymbol{w}-\boldsymbol{y}\rVert_2^2,
+  \label{eq:quadratic-loss} \\
+\nabla\mathcal{L}(\boldsymbol{w})
+  &= \frac{1}{n}X^{\mathsf{T}}(X\boldsymbol{w}-\boldsymbol{y}).
+  \label{eq:quadratic-gradient}
+\end{align}
+式~\eqref{eq:quadratic-loss} 与式~\eqref{eq:quadratic-gradient} 分别展示逐行编号和交叉引用。
+
+分段函数使用 \texttt{cases}，例如二分类决策规则
+\begin{equation}
+\widehat{y}(s)=
+\begin{cases}
+1, & s\geq\tau, \\
+0, & s<\tau,
+\end{cases}
+\label{eq:threshold-rule}
+\end{equation}
+其中 $s\in[0,1]$ 为模型输出的风险分数，$\tau$ 为判定阈值。
+矩阵可使用 \texttt{bmatrix}，例如一个无向图的邻接矩阵
+\begin{equation}
+A=\begin{bmatrix}
+0 & 1 & 1 \\
+1 & 0 & 0 \\
+1 & 0 & 0
+\end{bmatrix}.
+\label{eq:adjacency-matrix}
+\end{equation}
+
+\subsection{定义、引理、定理与证明}
+
+模板采用 SJTUTeX 对 \texttt{amsthm} 的支持。
+定义、引理、定理、推论和例分别按章独立编号，证明与注不编号；
+可选参数用于填写名称，标签与普通公式一样可以交叉引用。
+
+\begin{definition}[欧氏范数]
+\label{def:euclidean-norm}
+对向量 $\boldsymbol{x}=(x_1,\ldots,x_d)^{\mathsf{T}}\in\mathbb{R}^d$，
+其欧氏范数定义为
+\[
+\lVert\boldsymbol{x}\rVert_2
+  =\left(\sum_{j=1}^{d}x_j^2\right)^{1/2}.
+\]
+\end{definition}
+
+\begin{lemma}[平方和恒等式]
+\label{lem:pairwise-distance}
+设 $\boldsymbol{x}_1,\ldots,\boldsymbol{x}_n\in\mathbb{R}^d$，其中 $n\geq1$，则
+\begin{equation}
+\sum_{i=1}^{n}\sum_{j=1}^{n}
+  \lVert\boldsymbol{x}_i-\boldsymbol{x}_j\rVert_2^2
+  =2n\sum_{i=1}^{n}\lVert\boldsymbol{x}_i\rVert_2^2
+   -2\left\lVert\sum_{i=1}^{n}\boldsymbol{x}_i\right\rVert_2^2.
+\label{eq:pairwise-distance}
+\end{equation}
+\end{lemma}
+
+\begin{proof}
+由定义~\ref{def:euclidean-norm}，展开每一项可得
+\[
+\lVert\boldsymbol{x}_i-\boldsymbol{x}_j\rVert_2^2
+=\lVert\boldsymbol{x}_i\rVert_2^2
++\lVert\boldsymbol{x}_j\rVert_2^2
+-2\boldsymbol{x}_i^{\mathsf{T}}\boldsymbol{x}_j.
+\]
+对 $i,j$ 求和，并注意交叉项之和等于向量和的范数平方，即得结论。
+\end{proof}
+
+\begin{theorem}[均值向量的范数界]
+\label{thm:mean-norm-bound}
+对任意 $\boldsymbol{x}_1,\ldots,\boldsymbol{x}_n\in\mathbb{R}^d$，其中 $n\geq1$，有
+\begin{equation}
+\left\lVert\frac{1}{n}\sum_{i=1}^{n}\boldsymbol{x}_i\right\rVert_2^2
+\leq\frac{1}{n}\sum_{i=1}^{n}\lVert\boldsymbol{x}_i\rVert_2^2.
+\label{eq:mean-norm-bound}
+\end{equation}
+等号成立当且仅当所有向量相同。
+\end{theorem}
+
+\begin{proof}
+由引理~\ref{lem:pairwise-distance}，下式右端非负；等号成立恰好要求每一对向量相同：
+\begin{align*}
+\frac{1}{n}\sum_{i=1}^{n}\lVert\boldsymbol{x}_i\rVert_2^2
+-\left\lVert\frac{1}{n}\sum_{i=1}^{n}\boldsymbol{x}_i\right\rVert_2^2
+&=\frac{1}{2n^2}\sum_{i=1}^{n}\sum_{j=1}^{n}
+  \lVert\boldsymbol{x}_i-\boldsymbol{x}_j\rVert_2^2 \\
+&\geq0.\qedhere
+\end{align*}
+\end{proof}
+
+\begin{corollary}[两个向量的情形]
+\label{cor:two-vector-mean}
+在定理~\ref{thm:mean-norm-bound} 中取 $n=2$，可得
+\[
+\left\lVert\frac{\boldsymbol{x}+\boldsymbol{y}}{2}\right\rVert_2^2
+\leq\frac{\lVert\boldsymbol{x}\rVert_2^2+\lVert\boldsymbol{y}\rVert_2^2}{2}.
+\]
+\end{corollary}
+
+\begin{example}[二维向量]
+取 $\boldsymbol{x}=(1,0)^{\mathsf{T}}$、$\boldsymbol{y}=(0,1)^{\mathsf{T}}$，
+推论~\ref{cor:two-vector-mean} 两侧分别为 $1/2$ 和 $1$。
+\end{example}
+
+\begin{remark}
+证明以公式结束时，可用 \texttt{\textbackslash qedhere} 对齐证毕符号。
+\end{remark}
+
+\section{TikZ 与 PGFPlots 绘图}
+
+\subsection{TikZ 流程图}
+
+TikZ 可直接在论文源码中绘制矢量流程图。
+图~\ref{fig:risk-review-flow} 使用节点定位、箭头和判断分支，
+将式~\eqref{eq:threshold-rule} 的判定规则表示为业务流程。
+节点文字继承图环境的五号字体和单倍行距。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}[
+  font=\swufefloatfont,
+  node distance=5mm and 12mm,
+  process/.style={draw,rounded corners=2pt,minimum width=30mm,
+                  minimum height=8mm,align=center},
+  decision/.style={draw,diamond,aspect=2.3,inner sep=2pt,align=center},
+  flow/.style={-{Latex[length=2mm]},semithick}
+]
+\node[process] (input) {交易数据};
+\node[process,below=of input] (clean) {数据预处理};
+\node[process,below=of clean] (score) {模型风险评分};
+\node[decision,below=of score] (decision) {$s\geq\tau$？};
+\node[process,below left=of decision] (review) {人工复核};
+\node[process,below right=of decision] (pass) {正常放行};
+\draw[flow] (input) -- (clean);
+\draw[flow] (clean) -- (score);
+\draw[flow] (score) -- (decision);
+\draw[flow] (decision.west) -| node[above,pos=0.25] {是} (review.north);
+\draw[flow] (decision.east) -| node[above,pos=0.25] {否} (pass.north);
+\end{tikzpicture}
+\caption{基于风险阈值的交易审核流程}
+\label{fig:risk-review-flow}
+\end{figure}
+
+\subsection{PGFPlots 函数曲线}
+
+PGFPlots 基于 TikZ 绘制坐标轴、曲线与图例。
+图~\ref{fig:geometric-decay} 直接绘制 $y_k=0.8^k$ 和 $y_k=0.6^k$，
+横坐标取整数 $k=0,\ldots,10$。
+该图用于演示函数绘图，不代表实际实验结果；
+实测数据可通过坐标列表或数据文件传给绘图命令。
+
+\begin{figure}[htbp]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+  width=0.88\textwidth,
+  height=0.40\textwidth,
+  font=\swufefloatfont,
+  tick label style={font=\swufefloatfont},
+  label style={font=\swufefloatfont},
+  legend style={font=\swufefloatfont},
+  xlabel={迭代次数 $k$},
+  ylabel={序列值 $y_k$},
+  xmin=0,xmax=10,ymin=0,ymax=1.05,
+  xtick={0,2,4,6,8,10},
+  ytick={0,0.2,0.4,0.6,0.8,1},
+  grid=major,
+  legend pos=north east,
+  domain=0:10,samples=11
+]
+\addplot[blue,thick,mark=*] {0.8^x};
+\addlegendentry{$0.8^k$}
+\addplot[red,thick,dashed,mark=square*] {0.6^x};
+\addlegendentry{$0.6^k$}
+\end{axis}
+\end{tikzpicture}
+\caption{两种几何衰减序列的对比}
+\label{fig:geometric-decay}
+\end{figure}
