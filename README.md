@@ -18,9 +18,9 @@
 
 GitHub **Releases** 中提供两种 ZIP：
 
-| 文件名后缀 | 内容 |
-| --- | --- |
-| `-with-font.zip` | 模板源码、编译脚本和 `font/` 字体文件，适合希望保留示例字体的用户 |
+| 文件名后缀          | 内容                                                                              |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `-with-font.zip`    | 模板源码、编译脚本和 `font/` 字体文件，适合希望保留示例字体的用户                 |
 | `-without-font.zip` | 相同的模板源码和编译脚本，省略 `font/`，自动使用系统字体或 TeX 发行版中的替代字体 |
 
 两个 ZIP 都保留 `main.tex`、`setup.tex`、`config.json`、`refs.bib`、自定义文献样式、`contents/`、`figures/`、使用说明和许可证。`main.tex` 位于 ZIP 根目录，便于解压后本地编译或直接上传 Overleaf。ZIP 不包含 `example.pdf`、编译产物、测试及工作流文件；效果预览可查看仓库中的 [example.pdf](https://github.com/SWUFE-DB-Group/swufe-thesis-bachelor/blob/main/example.pdf)。
@@ -48,6 +48,10 @@ tlmgr update sjtutex jsonparse
 如果你不熟悉 LaTeX 的编译流程，建议使用下列编译脚本或编辑器配方。本地编译前，请满足上述版本要求，并安装 **BibTeX**、**latexmk** 及模板依赖的宏包。
 
 编译时，`latexmk` 会读取项目根目录的 `.latexmkrc`，使用发行版中的文档类，按需运行 BibTeX，并重复编译以更新目录、引用和页码。请在项目根目录运行命令。
+
+### TexLite（推荐）
+
+推荐使用 **[TexLite](https://swufe-db-group.github.io/TexLite/)** 撰写论文。TexLite 是轻量、自托管的 LaTeX 工作台，在浏览器中集成编辑、编译和 PDF 预览，并支持实时协作，使用本机或服务器上的实际 TeX 环境。欢迎访问官网了解安装和使用方法；编译本模板时，请满足上述版本要求，并选择 **XeLaTeX**。
 
 ### VS Code 用户
 
@@ -107,10 +111,10 @@ latexmk -xelatex -file-line-error -halt-on-error -interaction=nonstopmode main.t
 
 模板优先使用 `font/` 中的字体；文件缺失时查找同名系统字体，仍不可用时采用 TeX 发行版中的替代字体。即使整个 `font/` 目录不存在，也能在满足上述依赖要求的环境中编译。
 
-| 项目字体文件 | 用途 | 回退顺序 |
-| --- | --- | --- |
-| `STZHONGS.TTF` | 封面主标题及一级标题等的华文中宋 | 系统 `STZhongsong` → Fandol 宋体 |
-| `STFANGSO.TTF` | 封面信息栏与日期的华文仿宋 | 系统 `STFangsong` → Fandol 仿宋 |
+| 项目字体文件           | 用途                                 | 回退顺序                                |
+| ---------------------- | ------------------------------------ | --------------------------------------- |
+| `STZHONGS.TTF`         | 封面主标题及一级标题等的华文中宋     | 系统 `STZhongsong` → Fandol 宋体        |
+| `STFANGSO.TTF`         | 封面信息栏与日期的华文仿宋           | 系统 `STFangsong` → Fandol 仿宋         |
 | `Times New Roman*.ttf` | 西文与数字的常规、粗体、斜体、粗斜体 | 系统 Times New Roman → TeX Gyre TermesX |
 
 Times New Roman 的四个文件作为一组加载，缺少任意一个时整组回退。华文中宋与华文仿宋的粗体使用合成加粗，Fandol 宋体使用自带粗体。若提供字体文件，文件名须与配置一致，尤其注意 Linux 下的大小写。
@@ -129,24 +133,24 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 
 优先修改根目录的 `config.json`。论文信息统一放在 `info` 中，标题、姓名、学院、专业、导师和关键词均直接填写字符串，无需区分中英文。配置中已提供的字段会覆盖 `setup.tex` 的默认值；空字符串可用于清空可选字段。JSON 字符串中的 LaTeX 反斜杠需要写成 `\\`。
 
-| 字段 | 用途 |
-| --- | --- |
-| `review` | 是否启用盲审模式，取 `true` 或 `false` |
-| `citation_superscript` | 文献引用是否使用上标；默认 `false`（非上标），设为 `true` 启用上标 |
-| `bibliography.source` | 参考文献来源，默认 `"bib"`；设为 `"tex"` 使用手工参考文献 |
-| `bibliography.bib_file` | BibTeX 数据库路径，默认 `"refs.bib"` |
-| `bibliography.tex_file` | 手工参考文献路径，默认 `"contents/参考文献.tex"` |
-| `info.title` | 完整论文标题，用于页眉和 PDF 元数据 |
-| `info.display_title` | 封面题目的第一行；省略或留空则使用完整标题 |
-| `info.title_second` | 封面题目的第二行；省略或留空则只显示一行 |
-| `info.author` | 作者姓名 |
-| `info.student_id` | 学号，建议保留为字符串 |
-| `info.department` | 学院名称 |
-| `info.major` | 专业名称 |
-| `info.grade` | 年级，如 `2022级` |
-| `info.supervisor` | 导师姓名及职称 |
-| `info.final_date` | 封面日期，如 `2026年5月` |
-| `info.keywords` | 关键词，用英文逗号分隔 |
+| 字段                    | 用途                                                               |
+| ----------------------- | ------------------------------------------------------------------ |
+| `review`                | 是否启用盲审模式，取 `true` 或 `false`                             |
+| `citation_superscript`  | 文献引用是否使用上标；默认 `false`（非上标），设为 `true` 启用上标 |
+| `bibliography.source`   | 参考文献来源，默认 `"bib"`；设为 `"tex"` 使用手工参考文献          |
+| `bibliography.bib_file` | BibTeX 数据库路径，默认 `"refs.bib"`                               |
+| `bibliography.tex_file` | 手工参考文献路径，默认 `"contents/参考文献.tex"`                   |
+| `info.title`            | 完整论文标题，用于页眉和 PDF 元数据                                |
+| `info.display_title`    | 封面题目的第一行；省略或留空则使用完整标题                         |
+| `info.title_second`     | 封面题目的第二行；省略或留空则只显示一行                           |
+| `info.author`           | 作者姓名                                                           |
+| `info.student_id`       | 学号，建议保留为字符串                                             |
+| `info.department`       | 学院名称                                                           |
+| `info.major`            | 专业名称                                                           |
+| `info.grade`            | 年级，如 `2022级`                                                  |
+| `info.supervisor`       | 导师姓名及职称                                                     |
+| `info.final_date`       | 封面日期，如 `2026年5月`                                           |
+| `info.keywords`         | 关键词，用英文逗号分隔                                             |
 
 例如，封面题目需要分成两行时，可设置：
 
@@ -184,12 +188,12 @@ Times New Roman 的四个文件作为一组加载，缺少任意一个时整组�
 
 `setup.tex` 已加载 `amsthm`，使用 SJTUTeX 自动提供的环境，无需自行重复定义：
 
-| 环境 | 用途 |
-| --- | --- |
+| 环境                                          | 用途                                     |
+| --------------------------------------------- | ---------------------------------------- |
 | `definition`、`lemma`、`theorem`、`corollary` | 定义、引理、定理、推论，各类按章独立编号 |
-| `example` | 带编号的例 |
-| `proof` | 无编号的证明，自动添加证毕符号 |
-| `remark` | 无编号的注 |
+| `example`                                     | 带编号的例                               |
+| `proof`                                       | 无编号的证明，自动添加证毕符号           |
+| `remark`                                      | 无编号的注                               |
 
 例如 `\begin{theorem}[定理名称] ... \end{theorem}` 可添加名称，使用 `\label` 与 `\ref` 引用编号；证明末行是公式时，可用 `\qedhere` 将证毕符号放在该行。第二章包含一组完整的定义、引理、定理、证明、推论及数值示例，并演示 `align`、`cases` 和 `bmatrix`。
 
